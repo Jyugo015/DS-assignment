@@ -237,15 +237,15 @@ public class MultipleTool {
     public List<Tool> getAllTools() {
         List<Tool> tools = new ArrayList<>();
         if (head == null) {
-            return tools;  // 如果链表为空，返回空列表
+            return tools;  
         }
         Node current = head;
         do {
-            if (current != null && current.tool != null) { // 确保current和current.tool都不为null
-                tools.add(current.tool);  // 添加当前节点的工具到列表
-                current = current.next;  // 移动到下一个节点
+            if (current != null && current.tool != null) { 
+                tools.add(current.tool);  
+                current = current.next;  
             }
-        } while (current != head && current != null);  // 继续遍历直到回到头节点或current为null
+        } while (current != head && current != null);  
         return tools;
     }
 
