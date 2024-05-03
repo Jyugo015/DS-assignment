@@ -52,6 +52,11 @@ public class Tool {
     public void setGrade(int grade) {
         this.grade = grade;
     }
+
+    @Override
+    public String toString() {
+        return name + " " + type + "Grade:" + grade;
+    }
     
     
 
