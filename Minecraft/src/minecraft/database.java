@@ -1,4 +1,4 @@
-package code;
+package minecraft;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 // import java.util.ArrayList;
 // import java.util.LinkedHashMap;
 
-public class database {
+public class database<E> {
     public static void main(String[] args){
         try {
             // Establish a JDBC connection
@@ -44,19 +44,23 @@ public class database {
             Connection connection = getConnection();
             
             String statement = "CREATE TABLE IF NOT EXISTS ItemWikipedia"
-                    + "(ItemID INT PRIMARY KEY AUTO_INCREMENT, Type VARCHAR(255), Name VARCHAR(255), 'Function' VARCHAR(255))";
+                    + "(ItemID INT PRIMARY KEY AUTO_INCREMENT, Type VARCHAR(255), Name VARCHAR(255),"
+                    + "Functions VARCHAR(255))";
             PreparedStatement create = connection.prepareStatement(statement);
             
             statement = "CREATE TABLE IF NOT EXISTS ItemList"
-                    + "(ItemID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin, Name VARCHAR(255), Type VARCHAR(255), Quantity INT)";
+                    + "(ItemID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin,"
+                    + "Name VARCHAR(255), Type VARCHAR(255), Quantity INT)";
             PreparedStatement create2 = connection.prepareStatement(statement);
             
             statement = "CREATE TABLE IF NOT EXISTS ToolList"
-                    + "(ToolID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin, Name VARCHAR(255), Type VARCHAR(255), Function VARCHAR(255), Grade INT)";
+                    + "(ToolID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin,"
+                    + "Name VARCHAR(255), Type VARCHAR(255), Functions VARCHAR(255), Grade INT)";
             PreparedStatement create3 = connection.prepareStatement(statement);
             
             statement = "CREATE TABLE IF NOT EXISTS MultiTool"
-                    + "(ToolID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin, Name VARCHAR(255), Type VARCHAR(255), Function VARCHAR(255), Grade INT)";
+                    + "(ToolID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin," 
+                    + "Name VARCHAR(255), Type VARCHAR(255), Functions VARCHAR(255), Grade INT)";
             PreparedStatement create4 = connection.prepareStatement(statement);
             
             statement = "CREATE TABLE IF NOT EXISTS Potion"
@@ -65,23 +69,32 @@ public class database {
             PreparedStatement create5 = connection.prepareStatement(statement);
             
             statement = "CREATE TABLE IF NOT EXISTS PotionSatchel"
-                    + "(PotionID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin, Name VARCHAR(255), Effect VARCHAR(255), NextPotion VARCHAR(255))";
+                    + "(PotionID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin,"
+                    + "Name VARCHAR(255), Effect VARCHAR(255), NextPotion VARCHAR(255))";
             PreparedStatement create6 = connection.prepareStatement(statement);
             
             statement = "CREATE TABLE IF NOT EXISTS AutoFarmScheduling"
-                    + "(TaskID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin, BlockPos INT, Task VARCHAR(255), Status VARCHAR(255), Duration VARCHAR(255), ResourceUsed VARCHAR(255), ResourceQuantity INT)";
+                    + "(TaskID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin,"
+                    + "BlockPos INT, Task VARCHAR(255), Status VARCHAR(255), Duration VARCHAR(255)," 
+                    + "ResourceUsed VARCHAR(255), ResourceQuantity INT)";
             PreparedStatement create7 = connection.prepareStatement(statement);
 
             statement = "CREATE TABLE IF NOT EXISTS AutoFarmResource"
-                    + "(ResourceID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin, Resource VARCHAR(255), Quantity INT";
+                    + "(ResourceID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin," 
+                    + "Resource VARCHAR(255), Quantity INT)";
             PreparedStatement create8 = connection.prepareStatement(statement);
 
             statement = "CREATE TABLE IF NOT EXISTS SecureChest"
-                    + "(ChestID INT PRIMARY KEY AUTO_INCREMENT, ChestName VARCHAR(255), SecurityLevel VARCHAR(255), Owner VARCHAR(255) COLLATE utf8_bin, ApprovedUser VARCHAR(255) COLLATE utf8_bin, PermissionType VARCHAR(255))";
+                    + "(ChestID INT PRIMARY KEY AUTO_INCREMENT, ChestName VARCHAR(255),"
+                    + "SecurityLevel VARCHAR(255), Owner VARCHAR(255) COLLATE utf8_bin," 
+                    + "ApprovedUser VARCHAR(255) COLLATE utf8_bin, PermissionType VARCHAR(255))";
             PreparedStatement create9 = connection.prepareStatement(statement);
 
             statement = "CREATE TABLE IF NOT EXISTS SecureChestRequest"
-                    + "(ChestID INT PRIMARY KEY AUTO_INCREMENT, ChestName VARCHAR(255), Owner VARCHAR(255) COLLATE utf8_bin, Requestor VARCHAR(255) COLLATE utf8_bin, Group VARCHAR(255) COLLATE utf8_bin, RequestStatus VARCHAR(255), Purpose VARCHAR(255))";
+                    + "(ChestID INT PRIMARY KEY AUTO_INCREMENT, ChestName VARCHAR(255)," 
+                    + "Owner VARCHAR(255) COLLATE utf8_bin, Requestor VARCHAR(255) COLLATE utf8_bin," 
+                    + "Groupp VARCHAR(255) COLLATE utf8_bin, RequestStatus VARCHAR(255),"
+                    + "Purpose VARCHAR(255))";
             PreparedStatement create10 = connection.prepareStatement(statement);
 
             create.executeUpdate();
@@ -100,7 +113,32 @@ public class database {
         }
     }
 
-    public static boolean readDatabase(String user, String password) throws Exception{
+    // private class readDatabase{
+    //     public String statement;
+    //     Connection connection;
+    //     readDatabase(String user, String password) throws Exception{
+    //         try{
+    //             connection = getConnection();
+    //             statement = "SELECT * FROM userlist WHERE Username = '"+user+"' AND Password = '"+password+"'";
+    //         }
+    //         catch(Exception e){
+    //             System.out.println(e);
+    //         }
+    //     }
+
+    //     public boolean read() throws Exception{
+    //         try{
+    //             PreparedStatement search = this.connection.prepareStatement(this.statement);
+    //             ResultSet result = search.executeQuery();
+    //             return result.next();
+    //         }
+    //         catch(Exception e){
+    //             System.out.println(e);
+    //         }
+    //         return false;    
+    //     }
+    // }
+    public boolean readDatabase(String user, String password) throws Exception{
         try {
             Connection connection = getConnection();
             String statement;
@@ -123,7 +161,7 @@ public class database {
         return false;
     }
 
-    public static void insertData(String a, String b, String c, String d) throws Exception{
+    public void insertData(String a, String b, String c, String d) throws Exception{
         try{
             Connection connection = getConnection();
             String statement ="";
@@ -181,6 +219,86 @@ public class database {
         }
     }
     
+    public int NumOfRecord(String tableName, String username, String columnName) throws Exception{
+        int record=0;
+        try{
+            Connection connection = getConnection();
+            String statement = "SELECT COUNT(?) AS count FROM ? WHERE Username =?";
+            PreparedStatement count = connection.prepareStatement(statement);
+            count.setString(1, columnName);
+            count.setString(2, tableName);
+            count.setString(3, username);
+            ResultSet result = count.executeQuery();
+            if (result.next()){
+                return result.getInt("count");
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        return record;
+    }
+
+    public int NumOfUniqueRecord(String tableName, String username, String columnName) throws Exception{
+        int record=0;
+        try{
+            Connection connection = getConnection();
+            String statement = "SELECT COUNT(DISTINCT ?) AS count FROM ? WHERE Username =? ";
+            PreparedStatement count = connection.prepareStatement(statement);
+            count.setString(1, columnName);
+            count.setString(2, tableName);
+            count.setString(3, username);
+            ResultSet result = count.executeQuery();
+            if (result.next()){
+                return result.getInt("count");
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        return record;
+    }
+
+    public int maxValue(String tableName, String username, String columnName) throws Exception{
+        int max = 0;
+        try{
+            Connection connection = getConnection();
+            String statement = "SELECT MAX(?) AS max FROM ? WHERE Username =? ";
+            PreparedStatement count = connection.prepareStatement(statement);
+            count.setString(1, columnName);
+            count.setString(2, tableName);
+            count.setString(3, username);
+            ResultSet result = count.executeQuery();
+            if (result.next()){
+                return result.getInt("max");
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        return max;
+    }
+
+    public int minValue(String tableName, String username, String columnName) throws Exception{
+        int min = 0;//cincai give one datatype one, later will change according to each database 
+        try{
+            Connection connection = getConnection();
+            String statement = "SELECT MIN(?) AS min FROM ? WHERE Username =? ";
+            PreparedStatement count = connection.prepareStatement(statement);
+            count.setString(1, columnName);
+            count.setString(2, tableName);
+            count.setString(3, username);
+            ResultSet result = count.executeQuery();
+            if (result.next()){
+                return result.getInt("min");
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        return min;
+    }
+
     public static LinkedHashMap<String,String> sort(String mode, String username) throws Exception{
         LinkedHashMap <String, String> selected = new LinkedHashMap();
         String key="", value="", statement="";
