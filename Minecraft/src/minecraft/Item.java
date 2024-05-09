@@ -1,3 +1,4 @@
+
 package minecraft;
 
 public abstract class Item implements Comparable<Item>{
@@ -22,4 +23,3 @@ public abstract class Item implements Comparable<Item>{
     }
     
 }
-
