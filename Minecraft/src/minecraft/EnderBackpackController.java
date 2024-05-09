@@ -111,11 +111,9 @@ public class EnderBackpackController implements Initializable {
         dialog.setTitle("Increase Capacity");
         dialog.setHeaderText("How much do you want to add to your backpack capacity?");
 
-        // 设置按钮
         ButtonType okButtonType = new ButtonType("Confirm", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
-        // 创建一个输入区域
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -163,11 +161,9 @@ public class EnderBackpackController implements Initializable {
         dialog.setTitle("Reduce Capacity");
         dialog.setHeaderText("How much do you want to reduce your backpack capacity?");
 
-        // 设置按钮
         ButtonType okButtonType = new ButtonType("Confirm", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
-        // 创建一个输入区域
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -180,10 +176,8 @@ public class EnderBackpackController implements Initializable {
 
         dialog.getDialogPane().setContent(grid);
 
-        // 请求焦点
         Platform.runLater(capacityField::requestFocus);
 
-        // 结果转换
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == okButtonType) {
                 try {
@@ -198,8 +192,8 @@ public class EnderBackpackController implements Initializable {
         Optional<Integer> result = dialog.showAndWait();
         result.ifPresent(capacityReduction -> {
             System.out.println("Capacity reduced by: " + capacityReduction);
-            maxCapacity -= capacityReduction;  // 减少最大容量
-            updateDisplay();  // 更新界面
+            maxCapacity -= capacityReduction;  
+            updateDisplay();  
             updateIncreaseCapacityButton();
             updateReduceCapacityButton();
         });
