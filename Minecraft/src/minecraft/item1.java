@@ -1,4 +1,4 @@
-package code;
+package minecraft;
 
 import java.util.ArrayList;
 public class item1 {

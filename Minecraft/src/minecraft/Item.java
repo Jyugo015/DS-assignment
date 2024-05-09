@@ -1,4 +1,4 @@
-package code;
+package minecraft;
 
 public class Item {
     public int quantity;
