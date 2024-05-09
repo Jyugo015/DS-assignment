@@ -85,7 +85,7 @@ public class Potions {
         
         potionsMap.put("Healing Potion I", new Potion("Healing Potion I", 20, "Instantly heals the user"));
         potionsMap.put("Healing Potion II", new Potion("Healing Potion II", 50, "Instantly heals the user"));
-        potionsMap.put("Healing Potion IIII", new Potion("Healing Potion III", 100, "Instantly heals the user"));
+        potionsMap.put("Healing Potion III", new Potion("Healing Potion III", 100, "Instantly heals the user"));
               
         potionsMap.put("Swiftness Potion I", new Potion("Swiftness Potion I", 20, "Increase movement speed"));
         potionsMap.put("Swiftness Potion II", new Potion("Swiftness Potion II", 50, "Increase movement speed"));
