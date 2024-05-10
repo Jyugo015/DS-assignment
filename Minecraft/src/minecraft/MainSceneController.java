@@ -144,4 +144,31 @@ public class MainSceneController implements Initializable {
             e.printStackTrace();
         }
     }
+    
+        @FXML
+    private void switchToAdventurerDiary (ActionEvent event) {
+        URL fxmlUrl = null;
+        try {
+            fxmlUrl = getClass().getResource("AdventurerDiary.fxml");
+            if (fxmlUrl == null) {
+                throw new RuntimeException("Cannot find FXML file. Please check the file path.");
+            }
+
+            Parent oldPage = FXMLLoader.load(fxmlUrl);
+            Stage appStage = new Stage();
+            appStage.setTitle("AdventurerDiary.fxml");
+            Scene oldScene = new Scene(oldPage);
+//            Stage appStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            appStage.setScene(oldScene);
+            appStage.show();
+        } catch (Exception e) {
+            System.err.println("Failed to load the FXML file.");
+            if (fxmlUrl != null) {
+                System.err.println("Attempted to load from URL: " + fxmlUrl.toExternalForm());
+            } else {
+                System.err.println("URL was null, check the path to the FXML file.");
+            }
+            e.printStackTrace();
+        }
+    }
 }
