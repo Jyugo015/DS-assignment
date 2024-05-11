@@ -9,7 +9,7 @@
 
 <AnchorPane id="AnchorPane" prefHeight="354.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="minecraft.MainSceneController">
    <children>
-      <ImageView fitHeight="600.0" fitWidth="2000.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <ImageView fitHeight="600.0" fitWidth="2000.0" onDragDetected="#switchToEnderBackpack" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <image>
             <Image url="@icon/MainPage.png" />
          </image>
@@ -35,6 +35,18 @@
       <ImageView fitHeight="26.0" fitWidth="26.0" layoutX="558.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true">
          <image>
             <Image url="@icon/Potion.png" />
+         </image>
+      </ImageView>
+      <Button layoutX="61.0" layoutY="20.0" mnemonicParsing="false" onAction="#switchToCreatureEncyclopedia" prefHeight="34.0" prefWidth="194.0" text="           Creature Encyclopedia " />
+      <ImageView fitHeight="32.0" fitWidth="64.0" layoutX="53.0" layoutY="21.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@icon/Creature%20Encyclopedia.png" />
+         </image>
+      </ImageView>
+      <Button layoutX="61.0" layoutY="85.0" mnemonicParsing="false" onAction="#switchToAdventurerDiary" prefHeight="34.0" prefWidth="163.0" text="       Adventurer’s Diary" />
+      <ImageView fitHeight="32.0" fitWidth="34.0" layoutX="66.0" layoutY="88.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@icon/AdventurerDiary.png" />
          </image>
       </ImageView>
    </children>

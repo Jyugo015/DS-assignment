@@ -35,7 +35,6 @@ public class MultitoolGUIController implements Initializable {
 
     private MultipleTool multipleTools = new MultipleTool();
 
-    // 静态数组，初始化工具集合
     private List<Tool> toolslist = new ArrayList<>(Arrays.asList(
             new Tool("Hammer", "Hand Tool", "Hammering nails", 5),
             new Tool("Screwdriver", "Hand Tool", "Turning screws", 3),
@@ -49,10 +48,8 @@ public class MultitoolGUIController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // 初始化 toolList
         ObservableList<Tool> tools = FXCollections.observableArrayList(toolslist);
         toolList.setItems(tools);
-        // 初始化 multiToolList
         updateMultiToolListView();
     }
 
@@ -60,7 +57,6 @@ public class MultitoolGUIController implements Initializable {
         ObservableList<Tool> observableTools = FXCollections.observableArrayList(toolslist);
     toolList.setItems(observableTools);
     
-    // 强制刷新 ListView 来显示最新的数据
     toolList.refresh();
     }
 
@@ -102,9 +98,9 @@ public class MultitoolGUIController implements Initializable {
         Tool selectedTool = multiToolList.getSelectionModel().getSelectedItem();
         if (selectedTool != null) {
             try {
-                selectedTool.setGrade(selectedTool.getGrade() + 1); // 直接在选中的工具上升级
-                updateToolListView();  // 刷新toolList视图
-                updateMultiToolListView();  // 刷新multiToolList视图
+                selectedTool.setGrade(selectedTool.getGrade() + 1);
+                updateToolListView();  
+                updateMultiToolListView();  
             } catch (IllegalStateException e) {
                 showErrorDialog("Error", "Upgrade failed: " + e.getMessage());
             }
@@ -116,9 +112,9 @@ public class MultitoolGUIController implements Initializable {
         Tool selectedTool = multiToolList.getSelectionModel().getSelectedItem();
         if (selectedTool != null) {
             try {
-                selectedTool.setGrade(selectedTool.getGrade() - 1); // 直接在选中的工具上降级
-                updateToolListView();  // 刷新toolList视图
-                updateMultiToolListView();  // 刷新multiToolList视图
+                selectedTool.setGrade(selectedTool.getGrade() - 1); 
+                updateToolListView();  
+                updateMultiToolListView();  
             } catch (IllegalStateException e) {
                 showErrorDialog("Error", "Downgrade failed: " + e.getMessage());
             }
