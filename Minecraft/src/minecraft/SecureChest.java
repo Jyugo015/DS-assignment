@@ -22,16 +22,19 @@ import java.util.Set;
 
 public class SecureChest {
     private String owner;
-    private Map<String, Boolean> accessPermissions; // Map to store access permissions for players
+    private Map<String, Integer> accessPermissions; // Map to store access permissions for players
     private SecurityLevel securityLevel; // Enum to represent different security levels
     private Contents content;
     private Inventory inventory;
     private Set<String> accessRequests; // Set to store pending access requests
+    private final int NO_ACCESS = 0;
+    private final int VIEW_ONLY = 1;
+    private final int VIEWDEPOSITWITHDRAW = 2;
 
     public SecureChest(String owner) {
         this.owner = owner;
         accessPermissions = new HashMap<>();
-        accessPermissions.put(owner,true);
+        accessPermissions.put(owner,2);
         securityLevel = SecurityLevel.PRIVATE; // Default security level
         content = new Contents();
         inventory = new Inventory();
@@ -46,7 +49,7 @@ public class SecureChest {
     public enum SecurityLevel {
         PUBLIC, // Accessible to all players
         PRIVATE, // Accessible only to the owner 
-        GROUP; // Accessible to authorized players
+        SELFDEFINED; // Accessible to authorized players
     }
 
     // Method to get the security level of the chest (in String dt)
@@ -63,24 +66,24 @@ public class SecureChest {
     }
 
     // Method to grant access to a player: owner wants to add someone/ let someone to access this chest
-    public void grantAccess(String username) {
-        if (securityLevel == SecurityLevel.PUBLIC || securityLevel == SecurityLevel.GROUP) {
-            accessPermissions.put(username, true);
+    public void grantAccess(String username, int type) {
+        if (securityLevel == SecurityLevel.PUBLIC || securityLevel == SecurityLevel.SELFDEFINED) {
+            accessPermissions.put(username, type);
         }
     }
 
     // Method to revoke access from a player: owner can remove someone from the accessPermissios
-    public void revokeAccess(String username) {
-        if (securityLevel == SecurityLevel.PUBLIC || securityLevel == SecurityLevel.GROUP) {
-            accessPermissions.put(username, false);
+    public void revokeAccess(String username, int type) {
+        if (securityLevel == SecurityLevel.PUBLIC || securityLevel == SecurityLevel.SELFDEFINED) {
+            accessPermissions.put(username, type);
             accessPermissions.remove(username);
         }
     }
 
     // Method to check if a player has access to the chest
     public boolean hasAccess(String playerName) {
-        if (securityLevel == SecurityLevel.PUBLIC || securityLevel == SecurityLevel.GROUP) {
-            return accessPermissions.containsKey(playerName) && accessPermissions.get(playerName);
+        if (securityLevel == SecurityLevel.PUBLIC || securityLevel == SecurityLevel.SELFDEFINED) {
+            return accessPermissions.containsKey(playerName) && (accessPermissions.get(playerName) == 1 || accessPermissions.get(playerName) ==2);
         } else {
             return false; // If security level is PRIVATE, only the owner has access
         }
@@ -89,8 +92,8 @@ public class SecureChest {
     // Method to display the access permissions for all players
     public void displayAccessPermissions() {
         System.out.println("Access Permissions:");
-        for (Map.Entry<String, Boolean> entry : accessPermissions.entrySet()) {
-            System.out.println(entry.getKey() + ": " + (entry.getValue() ? "Granted" : "Revoked"));
+        for (Map.Entry<String, Integer> entry : accessPermissions.entrySet()) {
+            System.out.println(entry.getKey() + ": " + (entry.getValue() == 1 || entry.getValue() == 2 ? "Granted" : "Revoked"));
         }
     }
     
@@ -196,6 +199,7 @@ public class SecureChest {
     
     public void deposit (String username, String item, int quantity) {
         if (hasAccess(username)) {
+            if (accessPermisssions.get(username) == 1)
             content.displayContents();
             inventory.displayInventory();
             content.deposit(item, quantity);
