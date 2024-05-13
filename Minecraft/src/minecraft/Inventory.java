@@ -122,17 +122,17 @@ public class Inventory {
     }
 
     // Method to use an item from the inventory (decrease its quantity) and update the database
-    public void useInventory(String itemName) {
+    public void useInventory(String itemName, int quantity) {
         if (items.containsKey(itemName) && items.get(itemName) > 0) {
-            // Decrease the quantity of the item by 1
+            // Decrease the quantity of the item
             int currentQuantity = items.get(itemName);
-            items.put(itemName, currentQuantity - 1);
+            items.put(itemName, currentQuantity - quantity);
 
             // Update the database with the new inventory data
             updateDatabase(itemName, items.get(itemName));
         } else {
             // Print a message indicating that the item is not available
-            System.out.println(itemName + " is not available in the inventory.");
+            System.out.println(itemName + " is not enough in the inventory.");
         }
     }
 
