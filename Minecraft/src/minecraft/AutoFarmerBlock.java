@@ -48,7 +48,7 @@ public class AutoFarmerBlock {
     if (cropInfo != null && inventory.checkAvailability(cropInfo.getSeed())) {
         String toolNeeded = cropInfo.getToolNeeded();
         if (toolNeeded.equals("none") || inventory.checkAvailability(toolNeeded)) {
-            inventory.useInventory(cropInfo.getSeed());
+            inventory.useInventory(cropInfo.getSeed(),1);
             taskManager.add("Planting " + cropName);
             taskManager.add("Watering " + cropName);
             for (int i = 1; i <= cropInfo.getNumGrowthStages(); i++) { //add each growth stage into the queue
@@ -100,7 +100,7 @@ public class AutoFarmerBlock {
                 case "Growth" -> {
                     System.out.println("Growth Stage " + tokens[2] + " for " + cropName);
                     try {
-                        Thread.sleep((int)(Math.random()*6001+2001)); //growth stage duration 2-6 seconds each (random)
+                        Thread.sleep(5000); //growth stage duration 2-6 seconds each (random)
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
