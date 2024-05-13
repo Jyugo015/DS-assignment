@@ -29,7 +29,7 @@ public class SecureChest {
     private Set<String> accessRequests; // Set to store pending access requests
     private final int NO_ACCESS = 0;
     private final int VIEW_ONLY = 1;
-    private final int VIEWDEPOSITWITHDRAW = 2;
+    private final int FULL_ACCESS = 2;
 
     public SecureChest(String owner) {
         this.owner = owner;
@@ -65,25 +65,17 @@ public class SecureChest {
             System.out.println("You do not have the right to change Security Level");
     }
 
-    // Method to grant access to a player: owner wants to add someone/ let someone to access this chest
-    public void grantAccess(String username, int type) {
+    // Method to grant access to a player: owner wants to add / remove someone to access this chest
+    public void editAccess(String username, int type) {
         if (securityLevel == SecurityLevel.PUBLIC || securityLevel == SecurityLevel.SELFDEFINED) {
             accessPermissions.put(username, type);
-        }
-    }
-
-    // Method to revoke access from a player: owner can remove someone from the accessPermissios
-    public void revokeAccess(String username, int type) {
-        if (securityLevel == SecurityLevel.PUBLIC || securityLevel == SecurityLevel.SELFDEFINED) {
-            accessPermissions.put(username, type);
-            accessPermissions.remove(username);
         }
     }
 
     // Method to check if a player has access to the chest
     public boolean hasAccess(String playerName) {
         if (securityLevel == SecurityLevel.PUBLIC || securityLevel == SecurityLevel.SELFDEFINED) {
-            return accessPermissions.containsKey(playerName) && (accessPermissions.get(playerName) == 1 || accessPermissions.get(playerName) ==2);
+            return accessPermissions.containsKey(playerName) && (accessPermissions.get(playerName) == VIEW_ONLY || accessPermissions.get(playerName) == FULL_ACCESS);
         } else {
             return false; // If security level is PRIVATE, only the owner has access
         }
@@ -125,9 +117,9 @@ public class SecureChest {
     }
     
     // Method to approve access request
-    public void approveRequest(String username) {
+    public void approveRequest(String username, int type) {
         if (accessRequests.contains(username)) {
-            accessPermissions.put(username, true);
+            accessPermissions.put(username, type);
             accessRequests.remove(username);
             updateAccessLog(); // Update access log after approval
             System.out.println("Access request approved for " + username);
@@ -177,7 +169,7 @@ public class SecureChest {
     // Method to send an access request
     public void sendRequest(String username) {
         if (!accessPermissions.containsKey(username)) { // Check if the player is not already authorized
-            if (securityLevel == SecurityLevel.PUBLIC || securityLevel == SecurityLevel.GROUP) {
+            if (securityLevel == SecurityLevel.PUBLIC || securityLevel == SecurityLevel.SELFDEFINED) {
                 accessRequests.add(username);
                 logAccessRequest(username); // Log the access request
                 System.out.println("Access request sent to the owner.");
@@ -199,10 +191,13 @@ public class SecureChest {
     
     public void deposit (String username, String item, int quantity) {
         if (hasAccess(username)) {
-            if (accessPermisssions.get(username) == 1)
-            content.displayContents();
-            inventory.displayInventory();
-            content.deposit(item, quantity);
+            if (accessPermissions.get(username) == FULL_ACCESS) {
+                inventory.displayInventory();
+                content.deposit(item, quantity);
+            } else {
+                System.out.println("You are able to view only");
+            }
+            
         } else {
             System.out.println("You are not able to deposit items to this chest.");
         }
@@ -210,9 +205,13 @@ public class SecureChest {
     
     public void withdraw (String username, String item, int quantity) {
         if (hasAccess(username)) {
-            content.displayContents();
-            inventory.displayInventory();
-            content.withdraw(item, quantity);
+            if (accessPermissions.get(username) == FULL_ACCESS) {
+                inventory.displayInventory();
+                content.withdraw(item, quantity);
+            } else {
+                System.out.println("You are able to view only");
+            }
+            
         } else {
             System.out.println("You are not able to withdraw items from this chest.");
         }
