@@ -43,7 +43,7 @@ public class AutoFarmerBlock {
    
     //when addCrop button is clicked, add task into the queue.
     //if resources needed is insufficient, print out suitable message
-    public void addCrop(String cropName) {
+    public void addCrop(String cropName, boolean useFertiliser, String fertiliserType) {
     CropInfo cropInfo = cropInfoMap.get(cropName);
     if (cropInfo != null && inventory.checkAvailability(cropInfo.getSeed())) {
         String toolNeeded = cropInfo.getToolNeeded();
@@ -51,6 +51,12 @@ public class AutoFarmerBlock {
             inventory.useInventory(cropInfo.getSeed(),1);
             taskManager.add("Planting " + cropName);
             taskManager.add("Watering " + cropName);
+            if (useFertiliser) {
+                if (fertiliserType.equals("Bone Meal"))
+                    taskManager.add("Applying Bone Meal to " + cropName);
+                else if (fertiliserType.equals("Super Fertiliser"))
+                    taskManager.add("Applying Super Fertiliser to " + cropName);
+            }
             for (int i = 1; i <= cropInfo.getNumGrowthStages(); i++) { //add each growth stage into the queue
                 taskManager.add("Growth Stage " + i + " (" + cropName + ") ");
             }
@@ -86,8 +92,10 @@ public class AutoFarmerBlock {
         }
         
         while(!taskManager.isEmpty()) { //keeps execute the tasks until all tasks completed
-            String[] tokens = taskManager.peek().split(" ");
-            String taskType = tokens[0];
+            String[] parts = taskManager.peek().split(" ");
+            String taskType = parts[0];
+            String fertiliserType = null;
+            boolean useFertiliser = false;
             switch(taskType) {
                 case "Planting" -> {
                     System.out.println("Planted " + cropName);
@@ -97,10 +105,25 @@ public class AutoFarmerBlock {
                     System.out.println("Finished Watering " + cropName);
                     taskManager.poll();
                 }
+                case "Applying" -> {
+                    fertiliserType = parts[1] + " " + parts[2];
+                    useFertiliser = true;
+                    System.out.println("Applied " + fertiliserType + " to " + cropName);
+                    taskManager.poll();
+                }
                 case "Growth" -> {
-                    System.out.println("Growth Stage " + tokens[2] + " for " + cropName);
+                    System.out.println("Growth Stage " + parts[2] + " for " + cropName);
                     try {
-                        Thread.sleep(5000); //growth stage duration 2-6 seconds each (random)
+                        // Adjust growth stage duration based on fertiliser
+                    int growthDuration = 5000; // Default growth stage duration: 5 seconds
+                    if (useFertiliser) {
+                        if (fertiliserType.equals("Bone Meal")) {
+                            growthDuration = (int) (growthDuration * 0.8); // Reduce by 20% for bone meal
+                        } else if (fertiliserType.equals("Super Fertiliser")) {
+                            growthDuration = (int) (growthDuration * 0.6); // Reduce by 40% for super fertiliser
+                        }
+                    }
+                    Thread.sleep(growthDuration);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
