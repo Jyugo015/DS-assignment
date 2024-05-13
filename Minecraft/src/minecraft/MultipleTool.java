@@ -151,10 +151,28 @@ public class MultipleTool {
      * @return The next tool in the list. Returns the first tool if the current
      * tool is the last one.
      */
-    public Tool switchTool(Tool currentTool) {
+    public Tool switchToolDown(Tool currentTool) {
         Node currentNode = findNode(currentTool);
         if (currentNode != null && currentNode.next != null) {
             return currentNode.next.tool;
+        } else {
+            return head.tool; // Return to the first tool if current is the last tool
+        }
+    }
+    
+    /**
+     * Switches to the previous tool in the list based on the current tool. If the
+     * current tool is the first one, it wraps around to the last tool in the
+     * list.
+     *
+     * @param currentTool The current tool being used.
+     * @return The next tool in the list. Returns the first tool if the current
+     * tool is the last one.
+     */
+    public Tool switchToolUp(Tool currentTool) {
+        Node currentNode = findNode(currentTool);
+        if (currentNode != null && currentNode.next != null) {
+            return currentNode.prev.tool;
         } else {
             return head.tool; // Return to the first tool if current is the last tool
         }
