@@ -49,5 +49,11 @@
             <Image url="@icon/AdventurerDiary.png" />
          </image>
       </ImageView>
+      <Button layoutX="699.0" layoutY="13.0" mnemonicParsing="false" onAction="#switchToAutoFarmerBlock" prefHeight="34.0" prefWidth="157.0" text="           Auto-Farmer Block" />
+      <ImageView fitHeight="34.0" fitWidth="34.0" layoutX="704.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@icon/Auto-Farmer%20Block.png" />
+         </image>
+      </ImageView>
    </children>
 </AnchorPane>
