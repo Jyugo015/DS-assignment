@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox alignment="TOP_CENTER" prefHeight="406.0" prefWidth="600.0" spacing="10.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="minecraft.AdventurerDiaryController">
-   <children>
+         <children>
       <HBox alignment="TOP_CENTER" prefHeight="34.0" prefWidth="600.0" spacing="5.0">
          <children>
             <TextField fx:id="searchBar" promptText="Search Bar" />
