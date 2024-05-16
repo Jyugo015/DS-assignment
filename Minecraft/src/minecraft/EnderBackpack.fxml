@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.TilePane?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="474.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="minecraft.EnderBackpackController">
+   <children>
+      <Button fx:id="addItem" blendMode="SRC_ATOP" layoutX="374.0" layoutY="307.0" mnemonicParsing="false" onAction="#handleAddItemAction" text="Add item" />
+      <Button fx:id="reduceCapacityButton" layoutX="53.0" layoutY="307.0" mnemonicParsing="false" onAction="#handleReduceCapacityAction" prefHeight="25.0" prefWidth="108.0" text="Reduce Capacity" />
+      <Button fx:id="increaseCapacityButton" layoutX="53.0" layoutY="345.0" mnemonicParsing="false" onAction="#handleIncreaseCapacityAction" text="Increase Capacity" />
+      <Button fx:id="selectLastItemButton" layoutX="217.0" layoutY="325.0" maxHeight="177.0" maxWidth="225.0" minWidth="21.0" mnemonicParsing="false" prefHeight="47.0" prefWidth="42.0" style="-fx-background-radius: 20; -fx-min-width: 40px; -fx-min-height: 40px; -fx-max-height: 40px; -fx-max-width: 40px;" text="^" />
+      <ScrollPane layoutX="121.0" layoutY="14.0" prefHeight="270.0" prefWidth="262.0">
+         <content>
+            <TilePane fx:id="tilePane" prefHeight="264.0" prefWidth="254.0" stylesheets="@icon/.hbox%20.css" />
+         </content>
+      </ScrollPane>
+      <Label fx:id="labelItemNo" layoutX="306.0" layoutY="336.0" text="Number of items:" />
+      <Label fx:id="labelCapacity" layoutX="306.0" layoutY="356.0" text="Backpack Capacity:" />
+      <Label fx:id="showItemNo" layoutX="414.0" layoutY="336.0" text="Label" />
+      <Label fx:id="showCapacity" layoutX="414.0" layoutY="356.0" text="Label" />
+   </children>
+</AnchorPane>

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
 // import java.util.Map;
 // import java.util.ArrayList;
@@ -13,44 +14,48 @@ public class database<E> {
     public static void main(String[] args){
         try {
             // Establish a JDBC connection
-            getConnection();
-            createTable();
+            // getConnection();
+            // deleteTable();
+            // createTable();
+            // deleteResult("defaultUser");
+            // resetIndex();
+            // alterTable();
+
             // // Close the connection
             // connection.close();
+            deleteTable();
             } 
         catch (Exception e) {
             e.printStackTrace();
         }    
     }
 
-    public static Connection getConnection() throws Exception{
-        try{
-            String driver = "com.mysql.cj.jdbc.Driver";
-            String url = "jdbc:mysql://localhost:3306/minecraft";
-            String username = "root";
-            String password = "dbqLb1234!";
+    public static Connection getConnection() throws SQLException{
+        String driver = "com.mysql.cj.jdbc.Driver";
+        String url = "jdbc:mysql://localhost:3306/minecraft";
+        String username = "root";
+        String password = "dbqLb1234!";
+        try {
             Class.forName(driver);
-            Connection connection = DriverManager.getConnection(url, username, password);
-            return connection;
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Class not found for driver", e);
         }
-        catch(Exception e){
-            System.out.println(e);
-        }
-        return null;
+        Connection connection = DriverManager.getConnection(url, username, password);
+        System.out.println("Connected");
+        return connection;
     }
 
-    public static void createTable() throws Exception{
-        try{
+    public static void createTable() throws SQLException{
             Connection connection = getConnection();
             
-            String statement = "CREATE TABLE IF NOT EXISTS ItemWikipedia"
-                    + "(ItemID INT PRIMARY KEY AUTO_INCREMENT, Type VARCHAR(255), Name VARCHAR(255),"
-                    + "Functions VARCHAR(255))";
+            String statement = "CREATE TABLE IF NOT EXISTS ItemBox"
+            + "(ItemID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin,"
+            + "Name VARCHAR(255), Type VARCHAR(255), Functions VARCHAR(255), Quantity INT)";
             PreparedStatement create = connection.prepareStatement(statement);
             
-            statement = "CREATE TABLE IF NOT EXISTS ItemList"
+            statement = "CREATE TABLE IF NOT EXISTS ItemBackpack"
                     + "(ItemID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin,"
-                    + "Name VARCHAR(255), Type VARCHAR(255), Quantity INT)";
+                    + "Name VARCHAR(255), Type VARCHAR(255), Functions VARCHAR(255), Quantity INT)";
             PreparedStatement create2 = connection.prepareStatement(statement);
             
             statement = "CREATE TABLE IF NOT EXISTS ToolList"
@@ -64,8 +69,8 @@ public class database<E> {
             PreparedStatement create4 = connection.prepareStatement(statement);
             
             statement = "CREATE TABLE IF NOT EXISTS Potion"
-                    + "(PotionID INT PRIMARY KEY AUTO_INCREMENT, "
-                    + "Name VARCHAR(255), Effect VARCHAR(255), NextPotion VARCHAR(255))";
+                    + "(PotionID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin,"
+                    + "Name VARCHAR(255), Potency INT, Effect VARCHAR(255))";
             PreparedStatement create5 = connection.prepareStatement(statement);
             
             statement = "CREATE TABLE IF NOT EXISTS PotionSatchel"
@@ -95,7 +100,26 @@ public class database<E> {
                     + "Owner VARCHAR(255) COLLATE utf8_bin, Requestor VARCHAR(255) COLLATE utf8_bin," 
                     + "Groupp VARCHAR(255) COLLATE utf8_bin, RequestStatus VARCHAR(255),"
                     + "Purpose VARCHAR(255))";
+                    
             PreparedStatement create10 = connection.prepareStatement(statement);
+
+            statement = "CREATE TABLE IF NOT EXISTS BackpackCapacity"
+                    + "(BackpackID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255)," 
+                    + "Capacity INT)";
+                    
+            PreparedStatement create11 = connection.prepareStatement(statement);
+
+            statement = "CREATE TABLE IF NOT EXISTS userlist"
+            + "(UserID INT PRIMARY KEY AUTO_INCREMENT, Username VARCHAR(255) COLLATE utf8_bin," 
+            + "Passcode VARCHAR(255) COLLATE utf8_bin, Minecoin INT)";
+                    
+            PreparedStatement create12 = connection.prepareStatement(statement);
+
+            
+            statement = "CREATE TABLE IF NOT EXISTS ItemWikipedia"
+                    + "(ItemID INT PRIMARY KEY AUTO_INCREMENT, Type VARCHAR(255), Name VARCHAR(255),"
+                    + "Functions VARCHAR(255))";        
+            PreparedStatement create13 = connection.prepareStatement(statement);
 
             create.executeUpdate();
             create2.executeUpdate();
@@ -107,10 +131,9 @@ public class database<E> {
             create8.executeUpdate();
             create9.executeUpdate();
             create10.executeUpdate();
-        }
-        catch(Exception e){
-            System.out.println(e);
-        }
+            create11.executeUpdate();
+            create12.executeUpdate();
+            create13.executeUpdate();
     }
 
     // private class readDatabase{
@@ -138,8 +161,7 @@ public class database<E> {
     //         return false;    
     //     }
     // }
-    public boolean readDatabase(String user, String password) throws Exception{
-        try {
+    public boolean readDatabase(String user, String password) throws SQLException{
             Connection connection = getConnection();
             String statement;
             //readDatabase(username, password)
@@ -154,15 +176,9 @@ public class database<E> {
             PreparedStatement search = connection.prepareStatement(statement);
             ResultSet result = search.executeQuery();
             return result.next();
-        }
-        catch(Exception e){
-            System.out.println(e);
-        }
-        return false;
     }
 
-    public void insertData(String a, String b, String c, String d) throws Exception{
-        try{
+    public void insertData(String a, String b, String c, String d) throws SQLException{
             Connection connection = getConnection();
             String statement ="";
             int frequency=1;
@@ -213,15 +229,11 @@ public class database<E> {
             else if(a.equals("misspelled"))
                 insert.setInt(1,frequency);
             insert.executeUpdate();
-        }      
-        catch(Exception e){
-            System.out.println(e);
-        }
+        
     }
     
-    public int NumOfRecord(String tableName, String username, String columnName) throws Exception{
+    public int NumOfRecord(String tableName, String username, String columnName) throws SQLException{
         int record=0;
-        try{
             Connection connection = getConnection();
             String statement = "SELECT COUNT(?) AS count FROM ? WHERE Username =?";
             PreparedStatement count = connection.prepareStatement(statement);
@@ -232,16 +244,11 @@ public class database<E> {
             if (result.next()){
                 return result.getInt("count");
             }
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
         return record;
     }
 
-    public int NumOfUniqueRecord(String tableName, String username, String columnName) throws Exception{
+    public int NumOfUniqueRecord(String tableName, String username, String columnName) throws SQLException{
         int record=0;
-        try{
             Connection connection = getConnection();
             String statement = "SELECT COUNT(DISTINCT ?) AS count FROM ? WHERE Username =? ";
             PreparedStatement count = connection.prepareStatement(statement);
@@ -252,16 +259,11 @@ public class database<E> {
             if (result.next()){
                 return result.getInt("count");
             }
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
         return record;
     }
 
-    public int maxValue(String tableName, String username, String columnName) throws Exception{
+    public int maxValue(String tableName, String username, String columnName) throws SQLException{
         int max = 0;
-        try{
             Connection connection = getConnection();
             String statement = "SELECT MAX(?) AS max FROM ? WHERE Username =? ";
             PreparedStatement count = connection.prepareStatement(statement);
@@ -272,16 +274,11 @@ public class database<E> {
             if (result.next()){
                 return result.getInt("max");
             }
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
         return max;
     }
 
-    public int minValue(String tableName, String username, String columnName) throws Exception{
+    public int minValue(String tableName, String username, String columnName) throws SQLException{
         int min = 0;//cincai give one datatype one, later will change according to each database 
-        try{
             Connection connection = getConnection();
             String statement = "SELECT MIN(?) AS min FROM ? WHERE Username =? ";
             PreparedStatement count = connection.prepareStatement(statement);
@@ -292,17 +289,12 @@ public class database<E> {
             if (result.next()){
                 return result.getInt("min");
             }
-        }
-        catch(Exception e){
-            e.printStackTrace();
-        }
         return min;
     }
 
-    public static LinkedHashMap<String,String> sort(String mode, String username) throws Exception{
-        LinkedHashMap <String, String> selected = new LinkedHashMap();
+    public static LinkedHashMap<String,String> sort(String mode, String username) throws SQLException{
+        LinkedHashMap <String, String> selected = new LinkedHashMap<>();
         String key="", value="", statement="";
-        try{
             Connection connection = getConnection();
             switch(mode) {
                 //sort("leaderboard", null)
@@ -338,28 +330,18 @@ public class database<E> {
                 selected.put(result.getString(key),
                         String.valueOf(mode.equals("misspelled")?result.getInt(value):result.getFloat(value)));
             }                            
-        }
-        catch(Exception e){
-            System.out.println(e);
-        }
         return selected;
     }
 
-    public static void resetIndex() throws Exception{
-       try{
+    public static void resetIndex() throws SQLException{
            Connection connection = getConnection();
-           String statement ="ALTER TABLE result AUTO_INCREMENT =1";
+           String statement ="ALTER TABLE potionsatchel AUTO_INCREMENT =1";
 //            ALTER TABLE `table` AUTO_INCREMENT = number
            PreparedStatement change = connection.prepareStatement(statement);
            change.executeUpdate();
-       }
-       catch(Exception e){
-           e.printStackTrace();
-       }
    }
    
-   public static void deleteUser(String username) throws Exception{
-       try{
+   public static void deleteUser(String username) throws SQLException{
            Connection connection = getConnection();
            String statement ="DELETE FROM userlist WHERE Username =?";
            PreparedStatement delete = connection.prepareStatement(statement);
@@ -372,18 +354,13 @@ public class database<E> {
 //            if (row>0){
 //                System.out.println("Deleted");
 //            }
-       }
-       catch(Exception e){
-           e.printStackTrace();
-       }
    }
    
-   public static void deleteResult(String username) throws Exception{
-       try{
+   public static void deleteResult(String username) throws SQLException{
            Connection connection = getConnection();
-           String statement ="DELETE FROM result WHERE Username =?";
+           String statement ="DELETE FROM potionsatchel";
            PreparedStatement delete = connection.prepareStatement(statement);
-           delete.setString(1,username);
+        //    delete.setString(1,username);
            delete.executeUpdate();
 //            String statement ="SELECT username, password FROM userlist AS a,b";
 //            PreparedStatement delete = connection.prepareStatement(statement);
@@ -392,32 +369,42 @@ public class database<E> {
 //            if (row>0){
 //                System.out.println("Deleted");
 //            }
-       }
-       catch(Exception e){
-           e.printStackTrace();
-       }
    }
-    public static void deleteTable() throws Exception{
-       try{
+    
+   public static void deleteTable() throws SQLException{
            Connection connection = getConnection();
-           String statement ="DROP TABLE misspelled";
-           PreparedStatement drop = connection.prepareStatement(statement);
-           statement ="DROP TABLE leaderboard";
-           PreparedStatement drop1 = connection.prepareStatement(statement);
-           statement ="DROP TABLE result";
-           PreparedStatement drop2 = connection.prepareStatement(statement);
-           statement ="DROP TABLE userlist";
-           PreparedStatement drop3 = connection.prepareStatement(statement);
-           statement ="DROP TABLE suddenDeath";
+        //    String statement ="DROP TABLE misspelled";
+        //    PreparedStatement drop = connection.prepareStatement(statement);
+        //    statement ="DROP TABLE leaderboard";
+        //    PreparedStatement drop1 = connection.prepareStatement(statement);
+        //    statement ="DROP TABLE result";
+        //    PreparedStatement drop2 = connection.prepareStatement(statement);
+        //    statement ="DROP TABLE userlist";
+        //    PreparedStatement drop3 = connection.prepareStatement(statement);
+           String statement ="DROP TABLE itemwikipedia";
            PreparedStatement drop4 = connection.prepareStatement(statement);
 //            drop.executeUpdate();
-           drop1.executeUpdate();
-//            drop2.executeUpdate();
-//            drop3.executeUpdate();
-//            drop4.executeUpdate();
-       }
-       catch(Exception e){
-           e.printStackTrace();
-       }
+        //    drop1.executeUpdate();
+        //    drop2.executeUpdate();
+        //    drop3.executeUpdate();
+           drop4.executeUpdate();
+   }
+
+   public static void alterTable() throws SQLException{
+        Connection connection = getConnection();
+        String statement = "ALTER TABLE potion ADD Username VARCHAR(255) COLLATE utf8_bin";
+        // String statement = "ALTER TABLE potionsatchel DROP COLUMN effect, DROP COLUMN nextpotion";
+        // PreparedStatement changename = connection.prepareStatement(statement);
+        // changename.executeUpdate();
+        // // String statement = "ALTER TABLE multitool DROP COLUMN quantity";
+        // statement = "ALTER TABLE potionsatchel ADD (Potency INT, "
+        //                     + "Effect VARCHAR(255))";
+        // statement = "ALTER TABLE itemBox RENAME COLUMN oldname to newname";
+        // statement = "ALTER TABLE itemBox ALTER COLUMN/MODIFY COLUMN/MODIFY column_name datatype";
+        PreparedStatement addcolumn = connection.prepareStatement(statement);
+        addcolumn.executeUpdate();
+        // // statement = "ALTER TABLE itemBox RENAME TO itemWikipedia";
+        // PreparedStatement changename = connection.prepareStatement(statement);
+        // changename.executeUpdate();
    }
 }
