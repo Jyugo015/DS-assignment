@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package DS_Minecraft;
+package minecraft;
 
 /**
  *
@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 class AdventurerDiary {
+
     private Map<Integer, String> entries;
     private int entryCounter;
 
@@ -31,7 +32,7 @@ class AdventurerDiary {
         String entry = formattedTimestamp + " - " + eventDescription;
         this.entries.put(this.entryCounter++, entry);
         System.out.println("Event logged: " + entry);
-        
+
     }
 
     public void displayEntries() {
@@ -42,12 +43,15 @@ class AdventurerDiary {
             System.out.println("description: " + entry.getValue().split(" - ")[1]);
         }
     }
-   
 
-     public String shareEntry(int entryNumber) {
+    public Map<Integer, String> getEntries() {
+        return entries;
+    }
+
+    public String shareEntry(int entryNumber) {
         return entries.getOrDefault(entryNumber, "Invalid entry number");
     }
- 
+
     public void shareEvent() {
         Scanner scanner = new Scanner(System.in);
         boolean continueSharing = true;
@@ -92,34 +96,34 @@ class AdventurerDiary {
             System.out.println("\nDo you want to search an event? (Enter the keyword of the entry or 'exit' to stop)");
             String keyword = scanner.next().toLowerCase();
 
-        if (keyword.equals("exit")) {
-            break;
-        }
+            if (keyword.equals("exit")) {
+                break;
+            }
 
-        boolean found = false;
-        System.out.println("Search result:");
+            boolean found = false;
+            System.out.println("Search result:");
             for (Map.Entry<Integer, String> entry : this.entries.entrySet()) {
                 String description = entry.getValue().split(" - ")[1];
-            if (description.toLowerCase().contains(keyword)) {
-                found = true;
-                System.out.println(entry.getValue());
-                break; // Exit loop after finding the first match
+                if (description.toLowerCase().contains(keyword)) {
+                    found = true;
+                    System.out.println(entry.getValue());
+                    break; // Exit loop after finding the first match
+                }
+            }
+
+            if (!found) {
+                System.out.println("No matching events found.");
+            }
+
+            // Ask if the user wants to search another event
+            System.out.println("\nDo you want to search for another event? (yes/no)");
+            String searchAgainChoice = scanner.next().toLowerCase();
+            if (searchAgainChoice.equals("no")) {
+                searchAgain = false;
             }
         }
-
-        if (!found) {
-            System.out.println("No matching events found.");
-        }
-
-        // Ask if the user wants to search another event
-        System.out.println("\nDo you want to search for another event? (yes/no)");
-        String searchAgainChoice = scanner.next().toLowerCase();
-        if (searchAgainChoice.equals("no")) {
-            searchAgain = false;
-        }
     }
-}
-    
+
     public void verifyAllEvents() {
         System.out.println("Verifying all events:");
         for (String entry : this.entries.values()) {
@@ -149,7 +153,7 @@ class AdventurerDiary {
 
 
     public static void main(String[] args) {
- 
+
         AdventurerDiary diary = new AdventurerDiary();
         diary.logEvent("Player joined the game");
         diary.logEvent("Achievement earned: DIAMONDS!");
@@ -159,10 +163,8 @@ class AdventurerDiary {
 
         diary.shareEvent();
         diary.searchEvent();
-        
-         // Verify all events
+
+        // Verify all events
         diary.verifyAllEvents();
-      }
+    }
 }
-
-
