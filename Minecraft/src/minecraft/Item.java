@@ -1,15 +1,56 @@
 
 package minecraft;
 
-public abstract class Item implements Comparable<Item>{
+public class Item implements Comparable<Item>{
     private String name;
-
-    public Item(String name) {
+    private String category;
+    private int quantity = 0;
+    private int countOfUse = 0;
+    
+    public Item(String name, String category) {
         this.name = name;
+        this.category = category;
+    }
+
+    public String getCategory() {
+        return category;
     }
 
     public String getName() {
         return name;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+    
+    public int addQuantity(int quantity) {
+        this.quantity += quantity;
+        return this.quantity;
+    }
+    
+    public int removeQuantity(int quantity) {
+        if (this.quantity >= quantity) {
+            this.quantity -= quantity;
+        } else this.quantity = 0;
+
+        return this.quantity;
+    }
+
+    public void resetQuantity() {
+        this.quantity =0;
+    }
+
+    public int getCountOfUse() {
+        return countOfUse;
+    }
+
+    public void setCountOfUse(int countOfUse) {
+        this.countOfUse = countOfUse;
+    }
+
+    public void increaseCountOfUse() {
+        this.countOfUse++;
     }
 
     @Override
@@ -22,4 +63,8 @@ public abstract class Item implements Comparable<Item>{
         return name;
     }
     
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> b00b590eb9685225e4a53f91135da77a6d706267
