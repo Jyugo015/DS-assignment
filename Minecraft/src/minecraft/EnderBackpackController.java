@@ -182,11 +182,9 @@ public class EnderBackpackController extends database_item1 implements Initializ
         dialog.setTitle("Remove Item from Backpack");
         dialog.setHeaderText("How much do you want to remove from backpack for this item?");
 
-        // 设置按钮
         ButtonType okButtonType = new ButtonType("Confirm", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
-        // 创建一个输入区域
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -276,11 +274,9 @@ public class EnderBackpackController extends database_item1 implements Initializ
         dialog.setTitle("Increase Capacity");
         dialog.setHeaderText("How much do you want to add to your backpack capacity?");
 
-        // 设置按钮
         ButtonType okButtonType = new ButtonType("Confirm", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
-        // 创建一个输入区域
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -354,11 +350,9 @@ public class EnderBackpackController extends database_item1 implements Initializ
         dialog.setTitle("Reduce Capacity");
         dialog.setHeaderText("How much do you want to reduce your backpack capacity?");
 
-        // 设置按钮
         ButtonType okButtonType = new ButtonType("Confirm", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
-        // 创建一个输入区域
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -375,7 +369,6 @@ public class EnderBackpackController extends database_item1 implements Initializ
 
         dialog.getDialogPane().setContent(grid);
 
-        // 请求焦点
         Platform.runLater(capacityField::requestFocus);
 
         // Add a listener to the text property of the TextField
@@ -397,6 +390,7 @@ public class EnderBackpackController extends database_item1 implements Initializ
         });
 
         // 结果转换
+
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == okButtonType) {
                 try {
@@ -412,13 +406,15 @@ public class EnderBackpackController extends database_item1 implements Initializ
         Optional<Integer> result = dialog.showAndWait();
         result.ifPresent(capacityReduction -> {
             System.out.println("Capacity reduced by: " + capacityReduction);
+
             maxCapacity -= capacityReduction; 
             try {
                 backpack.reduceCapacity(capacityReduction);
             } catch (SQLException e) {
                 e.printStackTrace();
-            } // 减少最大容量
-            updateDisplay();  // 更新界面
+            } 
+            updateDisplay();  
+
             updateIncreaseCapacityButton();
             updateReduceCapacityButton();
         });

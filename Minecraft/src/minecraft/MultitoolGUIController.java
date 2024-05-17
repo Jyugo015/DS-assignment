@@ -36,6 +36,7 @@ public class MultitoolGUIController extends database_item2 implements Initializa
 
     private MultipleTool multipleTools = new MultipleTool();
 
+
     private static String username= "defaultUser";//=LoginPageController.username
 
     // 静态数组，初始化工具集合
@@ -47,6 +48,7 @@ public class MultitoolGUIController extends database_item2 implements Initializa
     //         new Tool("Wrench", "Hand Tool", "Gripping and turning nuts", 4)
     // )
 
+
     @FXML
     private Button addButton;
     @FXML
@@ -54,7 +56,7 @@ public class MultitoolGUIController extends database_item2 implements Initializa
 
     @Override
     public void initialize(URL url, ResourceBundle rb){
-        // 初始化 toolList
+
         try {
             multipleTools = new MultipleTool("defaultUser");
             toolslist = database_item2.retrieveTool("defaultUser");
@@ -64,7 +66,7 @@ public class MultitoolGUIController extends database_item2 implements Initializa
         }
         ObservableList<Tool> tools = FXCollections.observableArrayList(toolslist);
         toolList.setItems(tools);
-        // 初始化 multiToolList
+
         try {
             updateToolListView();
         } catch (SQLException e) {
@@ -76,9 +78,9 @@ public class MultitoolGUIController extends database_item2 implements Initializa
     private void updateToolListView() throws SQLException {
         toolslist = database_item2.retrieveTool("defaultUser");
         ObservableList<Tool> observableTools = FXCollections.observableArrayList(toolslist);
+
         toolList.setItems(observableTools);
         
-        // 强制刷新 ListView 来显示最新的数据
         toolList.refresh();
     }
 
@@ -127,10 +129,11 @@ public class MultitoolGUIController extends database_item2 implements Initializa
         Tool selectedTool = multiToolList.getSelectionModel().getSelectedItem();
         if (selectedTool != null) {
             try {
-                selectedTool.setGrade(selectedTool.getGrade() + 1); // 直接在选中的工具上升级
+
+                selectedTool.setGrade(selectedTool.getGrade() + 1); 
                 database_item2.upgradeTool("defaultUser", selectedTool.getName());
-                updateToolListView();  // 刷新toolList视图
-                updateMultiToolListView();  // 刷新multiToolList视图
+                updateToolListView();  
+                updateMultiToolListView(); 
             } catch (IllegalStateException e) {
                 showErrorDialog("Error", "Upgrade failed: " + e.getMessage());
             }
@@ -142,10 +145,12 @@ public class MultitoolGUIController extends database_item2 implements Initializa
         Tool selectedTool = multiToolList.getSelectionModel().getSelectedItem();
         if (selectedTool != null) {
             try {
-                selectedTool.setGrade(selectedTool.getGrade() - 1); // 直接在选中的工具上降级
+
+                selectedTool.setGrade(selectedTool.getGrade() - 1); 
                 database_item2.downgradeTool("defaultUser", selectedTool.getName());
-                updateToolListView();  // 刷新toolList视图
-                updateMultiToolListView();  // 刷新multiToolList视图
+                updateToolListView(); 
+                updateMultiToolListView();  
+
             } catch (IllegalStateException e) {
                 showErrorDialog("Error", "Downgrade failed: " + e.getMessage());
             }
@@ -159,7 +164,7 @@ public class MultitoolGUIController extends database_item2 implements Initializa
             try {
                 Tool nextTool = multipleTools.switchToolDown(currentTool);
                 multiToolList.getSelectionModel().select(nextTool);
-                multiToolList.scrollTo(nextTool);  // 确保新选中的工具可见
+                multiToolList.scrollTo(nextTool);
             } catch (IllegalStateException e) {
                 showErrorDialog("Error", "Switching tool failed: " + e.getMessage());
             }
