@@ -63,8 +63,5 @@ public class Item implements Comparable<Item>{
         return name;
     }
     
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> b00b590eb9685225e4a53f91135da77a6d706267
+
