@@ -5,7 +5,8 @@ import java.util.List;
 
 public class BinarySearchTree<E extends Item> {
     private Node<Item> root;
-    private int size =0;
+    private int size = 0;
+    private int quantity = 0;
     private ArrayList<Item> retrivingList = new ArrayList<>();
 
 //    public Node<Item> getRoot() {
@@ -14,6 +15,10 @@ public class BinarySearchTree<E extends Item> {
 
     public int getSize() {
         return size;
+    }
+
+    public int getQuantity() {
+        return quantity;
     }
     
     public void add(Item item) {
@@ -36,37 +41,42 @@ public class BinarySearchTree<E extends Item> {
                     current = current.right;
                 } else {
                     current.addQuantity(quantity);
-                    System.out.println("ADDED AMOUNT " + item+ ", now have " + current.getQuantity());
-                    System.out.println("Size of the tree: " + getSize());
+                    this.quantity += quantity;
+                    System.out.println("ADDED AMOUNT " + item.getName() + ", now have " + current.getQuantity());
+//                    System.out.println("Size of the tree: " + getSize());
                     return;
                 }
             }
+            System.out.println("Parent: " + parent.item.getName());
             // if the item is not found in the original tree, insert as a new node
             if (item.compareTo(parent.item) < 0) {
                 parent.left = new Node<>(item);
                 parent.left.parent  = parent;
                 parent.left.addQuantity(quantity); 
+                System.out.println("Inserted new item " + item + ", now have " + parent.left.getQuantity());
             } else {
                 parent.right = new Node<>(item);
                 parent.right.parent  = parent;
                 parent.right.addQuantity(quantity); 
+                System.out.println("Inserted new item " + item + ", now have " + parent.right.getQuantity());
             }
-            System.out.println("Inserted new item " + item + ", now have " + parent.getQuantity());
+            this.quantity += quantity;
         }
         size++;
-        System.out.println("Size of the tree: " + getSize());
+//        System.out.println("Size of the tree: " + getSize());
     }
     
     public String remove(String itemName) {
         return remove(itemName, 1);
     }
     
+    // ----------------------------got bug----------------------------
     public String remove(String itemName, int quantity) {
         if (size ==0) return null;
         Node<Item> current = getNode(itemName);
         if (current != null) {
             // remove the node entirely
-            if (current.getQuantity() == quantity) {
+            if (current.getQuantity() <= quantity) {
                 if (current.right != null) {
                     Node<Item>leftmostOfTheRight = current.right;
                     while (leftmostOfTheRight.left != null) {                        
@@ -74,30 +84,78 @@ public class BinarySearchTree<E extends Item> {
                     }
                     if (current.right != leftmostOfTheRight) {
                         leftmostOfTheRight.parent.left = null;
-                        leftmostOfTheRight.right = current.right;
-                        if (current != root) 
+                        leftmostOfTheRight.right =current.right;
+                        if (current.right != null) {
+                            current.right.parent = leftmostOfTheRight;
+                        }
+                        leftmostOfTheRight.left =current.left;
+                        if (current.left != null) {
+                            current.left.parent = leftmostOfTheRight;
+                        }
+                        
+                        if (current != root){
+                            leftmostOfTheRight.parent = current.parent;
                             current.parent.right = leftmostOfTheRight;
-                        else 
+                        } else {
                             root = leftmostOfTheRight;
+                            root.parent = null;
+                        }
                     } else { // the right is directly its replace
                         leftmostOfTheRight.left = current.left;
-                        if (current != root)
-                            current.parent.right = leftmostOfTheRight;
-                        else  
+                        if (current.left != null) {
+                            current.left.parent = leftmostOfTheRight;
+                        }
+                        if (current != root){
+                            if (current.item.getName().compareTo(current.parent.item.getName()) < 0) {
+                                leftmostOfTheRight.parent = current.parent;
+                                current.parent.left = leftmostOfTheRight;
+                                
+//                                System.out.println("Current: " + current.item.getName());
+//                                System.out.println("current.parent.left: " + current.parent.left.item.getName());
+                            } else {
+                                leftmostOfTheRight.parent = current.parent;
+                                current.parent.right = leftmostOfTheRight;
+//                                System.out.println("Current: " + current.item.getName());
+//                                System.out.println("current.parent.left: " + current.parent.left.item.getName());
+                            }
+                                
+                        } else {
                             root = leftmostOfTheRight;
-                    } 
-                } else if(current != root){
-                    Node<Item> parent  = current.parent;
-                    parent.left = current.left; 
+                            root.parent = null;
+//                            System.out.println("New root: " + root.item.getName());
+//                            System.out.println("root.left: " + root.left.item.getName());
+//                            System.out.println("root.right: " + root.right.item.getName());
+                        }
+                    }
                 } else if (current == root) {
-                    root = root.left; 
+                    root = current.left;
+                    if (root!= null) {
+                        root.parent = null;
+                    }
+                } else if (current.item.getName().compareTo(current.parent.item.getName()) > 0){
+                    current.parent.right = current.left;
+                    if (current.left != null) {
+                        current.parent.right.parent = current.parent;
+//                        System.out.println("Current.parent.left: " + current.parent.left);
+                    }
+                } else {
+                    current.parent.left = current.left;
+                    if (current.left != null) {
+                        current.parent.left.parent = current.parent;
+//                        System.out.println("Current.parent.left: " + current.parent.left);
+//                        System.out.println("Current.left.parent: " + current.left.parent);
+                    }
                 }
-                
-                current.removeQuantity(quantity);
+                this.quantity -= current.quantity;
+                current.removeQuantity(current.quantity);
                 size--;
+                current.parent = null;
+                // ------------------------------------Add back quantity---------------------------------------------
+                
                 System.out.printf("All %s is removed. Remain? %b%n", current.item.getName(), contains(itemName));
             } else {
                 current.removeQuantity(quantity);
+                this.quantity -= quantity;
                 System.out.printf("%d of %s is removed. Remain %d%n", quantity, current.item.getName(), current.getQuantity());
             }
             current.increaseCountOfUse();
@@ -117,16 +175,30 @@ public class BinarySearchTree<E extends Item> {
     }
     
     public List<Item> retrivePossibleItemsAfterwards(String searchedItem) {
-        Node<Item> parent  = null;
         Node<Item> current  = root;
         retriveAllItems();
-        while (current != null) {            
-            if (searchedItem.compareTo(current.item.getName()) < 0 && current.left != null) {
-                parent = current;
-                current = current.left;
-            } else {
-                current = parent;
+        while (current != null) {
+            int compare = searchedItem.compareToIgnoreCase(current.item.getName());
+//            System.out.println("Compare: " + compare);
+            if (compare == 0) {
                 break;
+            } else if (compare < 0 ) {
+                if (current.left != null) {
+                    current = current.left; 
+                } else {
+                    break;
+                } 
+            } else {
+                if (current.left == null && current.right == null) {
+                    current = current.parent;
+                    break;
+                }
+                if (current.right != null && current.right.item.getName().compareToIgnoreCase(searchedItem)<0) {
+                    current = current.parent;
+                    break;
+                } else {
+                    current = current.right;
+                }
             }
         }
         // if the item not found
@@ -137,13 +209,13 @@ public class BinarySearchTree<E extends Item> {
         for (int i = 0; i < retrivingList.size(); i++) {
             if (retrivingList.get(i) == (current.item)) {
                 index = i;
-                System.out.println(retrivingList.get(i));
-                System.out.println((current.item));
-                System.out.println("index " + index);
+//                System.out.println(retrivingList.get(i));
+//                System.out.println((current.item));
+//                System.out.println("index " + index);
                 break;
             }
         }
-        return retrivingList.subList(index, size-1);
+        return retrivingList.subList(index, size);
     }
     
     public ArrayList<Item> retriveAllItems() {
@@ -151,16 +223,19 @@ public class BinarySearchTree<E extends Item> {
         return retriveAllItemssupplement(root);
     }
     
-    private Node<Item> getNode(String name) {
+    public Node<Item> getNode(String name) {
         if (size ==0) return null;
         Node<Item> current = root;
         while (current != null) {            
-            if (name.compareTo(current.item.getName()) < 0)
+            if (name.compareToIgnoreCase(current.item.getName()) < 0)
                 current = current.left;
-            else if (name.compareTo(current.item.getName()) > 0)
+            else if (name.compareToIgnoreCase(current.item.getName()) > 0)
                 current = current.right;
-            else 
+            else{
+//                System.out.println("Current: " +current.item.getName());
                 return current;
+            }
+                
         }
         return null;
     }
@@ -174,6 +249,9 @@ public class BinarySearchTree<E extends Item> {
     }
     
     private ArrayList<Item> retriveAllItemssupplement(Node<Item> subroot) {
+        if (subroot == null) {
+            return null;
+        }
         if (subroot.left == null) {
             retrivingList.add(subroot.item); 
         } else {
