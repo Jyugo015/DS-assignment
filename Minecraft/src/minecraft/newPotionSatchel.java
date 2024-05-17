@@ -83,7 +83,6 @@ public class newPotionSatchel extends Potions{
             temp = temp.nextPotion;
         }
     }
- TJQ
 
     public void removePotion(Potion potion){
         int index = -1, tempIndex=1;
