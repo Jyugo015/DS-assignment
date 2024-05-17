@@ -29,6 +29,18 @@ public class Potions {
             this.nextPotion = null; // initialize nextPotion to null by default
         }
 
+        public Potion(String name){
+            this.name = name;
+            Map<String, Potion> map = new Potions().getPotionsMap();
+            for (Map.Entry<String, Potion> entry: map.entrySet()){
+                if (entry.getKey().equals(name)){
+                    this.potency = entry.getValue().getPotency();
+                    this.effect = entry.getValue().getEffect();
+                    this.nextPotion = null;
+                }
+            }
+        }
+
         // Getters and setters
         public String getName() {
             return name;
@@ -74,12 +86,8 @@ public class Potions {
     }
 
     // Method to initialize potions
-    public TreeMap<String, Potion> initializePotions() {
-        
-        int index = 1;
-       
-        TreeMap<String, Potion> sortedPotionsMap = new TreeMap<>();
-        
+    public void initializePotions() {
+               
         // 15 types of potions
         // total - 45 potions
         
@@ -142,7 +150,14 @@ public class Potions {
         potionsMap.put("Potion of Harming I", new Potion("Potion of Harming I", 20, "Cause instant damage and caneven kill the target"));
         potionsMap.put("Potion of Harming II", new Potion("Potion of Harming II", 50, "Cause instant damage and caneven kill the target"));
         potionsMap.put("Potion of Harming III", new Potion("Potion of Harming III", 100, "Cause instant damage and caneven kill the target"));
-        
+               
+    }
+
+    public TreeMap<String, Potion> getSortedPotionMap(){
+        int index = 1;
+       
+        TreeMap<String, Potion> sortedPotionsMap = new TreeMap<>();
+
         for(Map.Entry<String, Potion> entry : potionsMap.entrySet()){
             String potionName = entry.getKey();
             Potion potion = entry.getValue();
@@ -152,7 +167,6 @@ public class Potions {
         }
        
        return sortedPotionsMap;
-       
     }
 
     // Method to get potions map

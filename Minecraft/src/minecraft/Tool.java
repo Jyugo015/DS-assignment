@@ -8,11 +8,12 @@ package minecraft;
  *
  * @author Asus
  */
-public class Tool {
+public class Tool{
     private String name; 
     private String type; 
     private String function; 
     private int grade;
+    //want to add quantity?
 
     public Tool(String name, String type, String function, int grade) {
         this.name = name;
@@ -57,7 +58,4 @@ public class Tool {
     public String toString() {
         return name + " " + type + "Grade:" + grade;
     }
-    
-    
-
 }

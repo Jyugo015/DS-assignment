@@ -4,6 +4,7 @@
  */
 package minecraft;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,11 +17,21 @@ public class MultipleTool {
     private Node head;
     private Node tail;
     private int size;
+    private String username = "defaultUser";//to be got from login page 
 
     public MultipleTool() {
         this.head = null;
         this.tail = null;
         this.size = 0;
+    }
+
+    public MultipleTool(String username) throws SQLException{
+        this.username= username;
+        this.head = null;
+        this.tail = null;
+        this.size = 0;
+        List<Tool> toollist = database_item2.retrieveMultipleTool("defaultUser");
+        toollist.forEach(tool->this.addTool(tool));
     }
 
     private class Node {
@@ -30,9 +41,13 @@ public class MultipleTool {
         Node prev;
 
         public Node(Tool tool) {
+            this(tool, null,null);
+        }
+
+        public Node(Tool tool, Node next, Node prev){
             this.tool = tool;
-            this.next = null;
-            this.prev = null;
+            this.next = next;
+            this.prev = prev;
         }
     }
 
@@ -210,7 +225,8 @@ public class MultipleTool {
         Node currentNode = findNode(tool);
         if (currentNode != null) {
             currentNode.tool.setGrade(currentNode.tool.getGrade() + upgrade);
-            System.out.println("Grade for " + currentNode.tool.getName() + " is now " + currentNode.tool.getGrade());
+            System.out.println("Grade for " + currentNode.tool.getName() + " is now " + 
+                                currentNode.tool.getGrade());
         } else {
             System.out.println("Tool not found.");
         }
@@ -227,7 +243,8 @@ public class MultipleTool {
         Node currentNode = findNode(tool);
         if (currentNode != null) {
             currentNode.tool.setGrade(currentNode.tool.getGrade() - downgrade);
-            System.out.println("Grade for " + currentNode.tool.getName() + " is now " + currentNode.tool.getGrade());
+            System.out.println("Grade for " + currentNode.tool.getName() + " is now " + 
+                                currentNode.tool.getGrade());
         } else {
             System.out.println("Tool not found.");
         }

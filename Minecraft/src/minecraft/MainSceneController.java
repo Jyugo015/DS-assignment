@@ -33,7 +33,6 @@ public class MainSceneController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
     }
 
     @FXML
@@ -64,7 +63,7 @@ public class MainSceneController implements Initializable {
     }
 
     @FXML
-    private void switchToEnderBackpack(ActionEvent event) {
+    public void switchToEnderBackpack(ActionEvent event) {
         URL fxmlUrl = null;
         try {
             fxmlUrl = getClass().getResource("EnderBackpack.fxml");

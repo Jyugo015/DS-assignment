@@ -5,6 +5,7 @@
 package minecraft;
 
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,7 +25,7 @@ import javafx.scene.control.ListView;
  *
  * @author Asus
  */
-public class MultitoolGUIController implements Initializable {
+public class MultitoolGUIController extends database_item2 implements Initializable {
 
     @FXML
     private ListView<Tool> toolList;
@@ -35,11 +36,18 @@ public class MultitoolGUIController implements Initializable {
 
     private MultipleTool multipleTools = new MultipleTool();
 
-    private List<Tool> toolslist = new ArrayList<>(Arrays.asList(
-            new Tool("Hammer", "Hand Tool", "Hammering nails", 5),
-            new Tool("Screwdriver", "Hand Tool", "Turning screws", 3),
-            new Tool("Wrench", "Hand Tool", "Gripping and turning nuts", 4)
-    ));
+
+    private static String username= "defaultUser";//=LoginPageController.username
+
+    // 静态数组，初始化工具集合
+    private List<Tool> toolslist = new ArrayList<Tool>();
+    //  = new ArrayList<>();
+    // Arrays.asList(
+    //         new Tool("Hammer", "Hand Tool", "Hammering nails", 5),
+    //         new Tool("Screwdriver", "Hand Tool", "Turning screws", 3),
+    //         new Tool("Wrench", "Hand Tool", "Gripping and turning nuts", 4)
+    // )
+
 
     @FXML
     private Button addButton;
@@ -47,17 +55,33 @@ public class MultitoolGUIController implements Initializable {
     private Button removeButton;
 
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
+    public void initialize(URL url, ResourceBundle rb){
+
+        try {
+            multipleTools = new MultipleTool("defaultUser");
+            toolslist = database_item2.retrieveTool("defaultUser");
+            toolslist.forEach(e->System.out.println(e));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         ObservableList<Tool> tools = FXCollections.observableArrayList(toolslist);
         toolList.setItems(tools);
+
+        try {
+            updateToolListView();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         updateMultiToolListView();
     }
 
-    private void updateToolListView() {
+    private void updateToolListView() throws SQLException {
+        toolslist = database_item2.retrieveTool("defaultUser");
         ObservableList<Tool> observableTools = FXCollections.observableArrayList(toolslist);
-    toolList.setItems(observableTools);
-    
-    toolList.refresh();
+
+        toolList.setItems(observableTools);
+        
+        toolList.refresh();
     }
 
     private void updateMultiToolListView() {
@@ -66,26 +90,33 @@ public class MultitoolGUIController implements Initializable {
     }
 
     @FXML
-    private void handleAddToMultiTool() {
+    private void handleAddToMultiTool() throws SQLException {
         Tool selectedTool = toolList.getSelectionModel().getSelectedItem();
         if (selectedTool != null) {
             multipleTools.addTool(selectedTool);
+            database_item2.addTool(username, selectedTool.getName(), selectedTool.getType(),
+                                   selectedTool.getFunction(), selectedTool.getGrade());
+            database_itemBox.removeItem(selectedTool.getName(), username, 1);
             updateMultiToolListView();
         }
     }
 
     @FXML
-    private void handleRemoveFromMultiTool() {
+    private void handleRemoveFromMultiTool() throws SQLException {
         Tool selectedTool = multiToolList.getSelectionModel().getSelectedItem();
         if (selectedTool != null) {
             multipleTools.removeTool(selectedTool);
+            database_item2.removeTool(selectedTool.getName(), username);
+            database_itemBox.addItem(username, selectedTool.getName(), "Tool", 
+            selectedTool.getFunction(), 1);
             updateMultiToolListView();
         }
     }
 
     @FXML
-    private void handleClearList() {
+    private void handleClearList() throws SQLException {
         multipleTools.clear();
+        database_item2.clearTool(username);
         updateMultiToolListView();
     }
 
@@ -94,13 +125,15 @@ public class MultitoolGUIController implements Initializable {
     }
 
     @FXML
-    private void handleUpgradeTool(ActionEvent event) {
+    private void handleUpgradeTool(ActionEvent event) throws SQLException {
         Tool selectedTool = multiToolList.getSelectionModel().getSelectedItem();
         if (selectedTool != null) {
             try {
-                selectedTool.setGrade(selectedTool.getGrade() + 1);
+
+                selectedTool.setGrade(selectedTool.getGrade() + 1); 
+                database_item2.upgradeTool("defaultUser", selectedTool.getName());
                 updateToolListView();  
-                updateMultiToolListView();  
+                updateMultiToolListView(); 
             } catch (IllegalStateException e) {
                 showErrorDialog("Error", "Upgrade failed: " + e.getMessage());
             }
@@ -108,13 +141,16 @@ public class MultitoolGUIController implements Initializable {
     }
 
     @FXML
-    private void handleDowngradeTool(ActionEvent event) {
+    private void handleDowngradeTool(ActionEvent event) throws SQLException {
         Tool selectedTool = multiToolList.getSelectionModel().getSelectedItem();
         if (selectedTool != null) {
             try {
+
                 selectedTool.setGrade(selectedTool.getGrade() - 1); 
-                updateToolListView();  
+                database_item2.downgradeTool("defaultUser", selectedTool.getName());
+                updateToolListView(); 
                 updateMultiToolListView();  
+
             } catch (IllegalStateException e) {
                 showErrorDialog("Error", "Downgrade failed: " + e.getMessage());
             }
@@ -128,7 +164,7 @@ public class MultitoolGUIController implements Initializable {
             try {
                 Tool nextTool = multipleTools.switchToolDown(currentTool);
                 multiToolList.getSelectionModel().select(nextTool);
-                multiToolList.scrollTo(nextTool);  // 确保新选中的工具可见
+                multiToolList.scrollTo(nextTool);
             } catch (IllegalStateException e) {
                 showErrorDialog("Error", "Switching tool failed: " + e.getMessage());
             }

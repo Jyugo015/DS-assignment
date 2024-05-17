@@ -25,9 +25,9 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
       </GridPane>
-      <Button layoutX="75.0" layoutY="296.0" mnemonicParsing="false" onAction="#handleAddButtonClick" text="Add Potion" />
+      <Button fx:id="addButton" layoutX="75.0" layoutY="296.0" mnemonicParsing="false" onAction="#handleAddButtonClick" text="Add Potion" />
       <Button layoutX="555.0" layoutY="387.0" mnemonicParsing="false" onAction="#handleDoneButtonClick" text="Done" />
-      <Button layoutX="183.0" layoutY="296.0" mnemonicParsing="false" onAction="#handleRemoveButtonClick" text="Remove Potion" />
+      <Button fx:id="removeButton" layoutX="183.0" layoutY="296.0" mnemonicParsing="false" onAction="#handleRemoveButtonClick" text="Remove Potion" />
       <ScrollPane layoutX="30.0" layoutY="27.0" prefHeight="258.0" prefWidth="595.0">
          <content>
             <GridPane fx:id="potionGrid" hgap="10.0" prefHeight="379.0" prefWidth="684.0" vgap="10.0">

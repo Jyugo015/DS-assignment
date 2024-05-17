@@ -34,7 +34,8 @@ public class newPotionSatchel extends Potions{
          return size;
      }
      
-    // Method to add potion to satchel based on index
+
+    // Method to add potion to satchel based on index(referring to the potionMap)
     public void addPotionByIndex(int index) {
         if (index >= 1 && index <= getPotionsMap().size()) {
             Scanner scanner = new Scanner(System.in);
@@ -82,6 +83,22 @@ public class newPotionSatchel extends Potions{
             temp = temp.nextPotion;
         }
     }
+ TJQ
+
+    public void removePotion(Potion potion){
+        int index = -1, tempIndex=1;
+        Potion current = head;
+        while (current.nextPotion !=null){
+            if (current.equals(potion)){
+                index = tempIndex;
+                break;
+            }
+            current = current.nextPotion;
+            tempIndex++;
+        }
+        removePotionByIndex(index);
+    }
+
     
     public void removePotionByIndex(int index) {
     if (index >= 1 && index <= size) { //size = current size of the satchel
