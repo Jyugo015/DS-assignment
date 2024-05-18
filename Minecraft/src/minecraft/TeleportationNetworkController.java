@@ -28,7 +28,7 @@ public class TeleportationNetworkController {
     }
     
     public boolean removeNode(Point node) {
-        int indexCurrent = getIndex(node);
+        int indexCurrent = getIndex(node.nameOfTeleportationPoint);
         if (indexCurrent != -1) {
             long startTime = System.currentTimeMillis();
             // remove neigbour's neigbours(current) from neighbour
@@ -39,7 +39,7 @@ public class TeleportationNetworkController {
                         break;
                     }
                 }
-                int indexNeighbour= getIndex(n); // find neighbour index
+                int indexNeighbour= getIndex(n.nameOfTeleportationPoint); // find neighbour index
                 for (int i = 0; i <  adjacencyList.get(indexNeighbour).size() ; i++) {
                     if (adjacencyList.get(indexNeighbour).get(i).n2.nameOfTeleportationPoint.equals(node.getNameOfTeleportationPoint())) {
                         adjacencyList.get(indexNeighbour).remove(i); // remove from adjacency list
@@ -99,15 +99,12 @@ public class TeleportationNetworkController {
         return getNode(nodeName.getNameOfTeleportationPoint()) != null;
     }
     
-    protected static int getIndex(Point node) {
+    protected static int getIndex(String nodeName) {
         for (int i = 0; i < nodes.size(); i++) {
-            if (nodes.get(i).equals(node)) {
+            if (nodes.get(i).nameOfTeleportationPoint.equals(nodeName)) {
 //                System.out.println("is equal");
                 return i;
             } 
-//            else {
-//                System.out.println(node.getNameOfTeleportationPoint().equals(nodes.get(i).getNameOfTeleportationPoint()));
-//            }
         }
         return -1;
     }
@@ -184,7 +181,7 @@ public class TeleportationNetworkController {
             if (u != -1) {
                 visited.add(reachableNode.get(u));
            
-                for (Edge edge : adjacencyList.get(getIndex(reachableNode.get(u)))) {
+                for (Edge edge : adjacencyList.get(getIndex(reachableNode.get(u).getNameOfTeleportationPoint()))) {
                     for (int i = 0; i < size; i++) {
                         if (edge.n2.equals(reachableNode.get(i))) {
                            if (! visited.contains(reachableNode.get(i)) && distance[i] > distance[u] + edge.getDistance()) {
@@ -234,7 +231,7 @@ public class TeleportationNetworkController {
     }
     
     public double getDistance(Point teleportationPoint, Point destination) {
-        for (Edge edge : adjacencyList.get(getIndex(teleportationPoint))) {
+        for (Edge edge : adjacencyList.get(getIndex(teleportationPoint.getNameOfTeleportationPoint()))) {
             if (edge.n2.equals(destination)) {
                 System.out.println("Edge: " + edge);
                 return edge.distance;
@@ -309,8 +306,8 @@ public class TeleportationNetworkController {
             neighbour.neighbours.add(this);
             System.out.println("added");
             // create edge between them
-            adjacencyList.get(getIndex(this)).add(new Edge(this, neighbour));
-            adjacencyList.get(getIndex(neighbour)).add(new Edge(neighbour, this));
+            adjacencyList.get(getIndex(this.nameOfTeleportationPoint)).add(new Edge(this, neighbour));
+            adjacencyList.get(getIndex(neighbour.nameOfTeleportationPoint)).add(new Edge(neighbour, this));
             edges.add(new Edge(this, neighbour));
             return true;
         }
@@ -323,9 +320,9 @@ public class TeleportationNetworkController {
         
         public boolean removeNeighbour(String removedNeighbourName) {
             Point neighbour = getNode(removedNeighbourName);
-            int indexCurrent = getIndex(this);
+            int indexCurrent = getIndex(this.nameOfTeleportationPoint);
             if (neighbour != null) {
-                int indexNeighbour = getIndex(neighbour);
+                int indexNeighbour = getIndex(neighbour.nameOfTeleportationPoint);
                 // remove neighbour's adjacency list that N2 is this
                 for (int i = 0; i < adjacencyList.get(indexNeighbour).size(); i++) {
                     if (adjacencyList.get(indexNeighbour).get(i).getN2().equals(this)) {

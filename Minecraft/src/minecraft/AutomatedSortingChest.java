@@ -1,9 +1,11 @@
 package minecraft;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.beans.value.ChangeListener;
@@ -40,7 +42,9 @@ import minecraft.Item;
 
 
 public class AutomatedSortingChest extends Application {
-    private static BSTs<Item> bst = new BSTs<>();
+    private static BSTs<Item> bst = new BSTs<>();;
+    private static String imageFilePath = "/minecraft/icon/";
+    
 //    private String[] categories = {"Tools" , "Food", "Arrows", "Decorations", "MobEggs", "Weapons", "Armor", "Materials", "Transportations", "Potions", "Records", "Dyes"};
     static String[] itemsCollections = {"Axes", "Shovels", "Apple", "Clownfish", "Swords", "Diamond","Potion of Decay", "Potion of Invisibility" , "Bucket" , "Wood" , "Stone" , "Red stone"};
     static String[] ItemImagesCollections = {"Axes.jpeg", "Shovels.jpg", "Apple.jpg", "Clownfish.jpg", "Swords.jpg", "Diamond.jpg","Potion_of_Decay.jpg","Potion_of_Invisibility.gif","Bucket.jpg","Oak_Wood.jpg","Stone.jpg","Redstone.jpg"};
@@ -48,11 +52,12 @@ public class AutomatedSortingChest extends Application {
     private static boolean isSelected = false;
     private static SingleItemPane selected;
     private static String categoryChosen = "(Include ALL)";
-    private static List<Item> allItems = bst.getParticularCategory(categoryChosen).retriveAllItems();
+    private static List<Item> allItems= bst.getParticularCategory(categoryChosen).retriveAllItems();;
     private static Image backgroundImage;
     private static Stage stage = new Stage();
      
     private static Text reminder = new Text();
+    private static Button backToMainPageButton = new Button("Back to main page");
     private static Text totalNoOfItemInChest = new Text();
     private static Text totalNoOfItemOfCategory = new Text();
     private static TextField searchItemTextField = new TextField(categoryChosen);
@@ -67,6 +72,48 @@ public class AutomatedSortingChest extends Application {
     @Override
     public void start(Stage primaryStage) {
         
+        
+        Item[] items = new Item[9];
+        items[0] = new Item("Axes", "Tools");
+        items[1] = new Item("Shovels", "Tools");
+        items[2] = new Item("Apple", "Food");
+        items[3] = new Item("Clownfish", "Food");
+        items[4] = new Item("Swords", "Weapons");
+        items[5] = new Item("Diamond", "Materials");
+        items[6] = new Item("Potion of Decay", "Potions");
+        items[7] = new Item("Potion of Invisibility", "Potions");
+        items[8] = new Item("Bucket", "Tools");
+        
+        
+        for (int i = 0; i < items.length; i++) {
+            bst.add(items[i]);
+        }
+        bst.add(items[0],100);
+        
+        unsortedItemNameArrayList.add("Axes");
+        unsortedItemNameArrayList.add("Wood");
+        unsortedItemNameArrayList.add("Stone");
+        unsortedItemNameArrayList.add("Red stone");
+        unsortedItemQuantityArrayList.add(10);
+        unsortedItemQuantityArrayList.add(20);
+        unsortedItemQuantityArrayList.add(30);
+        unsortedItemQuantityArrayList.add(40);
+        unsortedItemCategoryArrayList.add("Tools");
+        unsortedItemCategoryArrayList.add("Materials");
+        unsortedItemCategoryArrayList.add("Materials");
+        unsortedItemCategoryArrayList.add("Materials");
+        
+        backToMainPageButton.setOnAction(e->{
+            try {
+                MainPage mainPage = new MainPage();
+                mainPage.start((Stage) ((Button) e.getSource()).getScene().getWindow());
+//                stage.close();
+            } catch (IOException ex) {
+                Logger.getLogger(AutomatedSortingChest.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        
+        backgroundImage = new Image(getClass().getResourceAsStream(imageFilePath + "background.jpeg"));
         stage = primaryStage;
         stage.setTitle("Automated Sorting Chest");
         stage.setScene(scene1());
@@ -112,6 +159,8 @@ public class AutomatedSortingChest extends Application {
         bottomPane.getChildren().add(addcurrentItemButton);
         bottomPane.getChildren().add(removeCurrentItemButton);
         bottomPane.getChildren().add(reminder);
+        bottomPane.getChildren().add(backToMainPageButton);
+        
         
         // Right pane
         pane1.setRight(addNewItemButton);
@@ -209,7 +258,7 @@ public class AutomatedSortingChest extends Application {
         pane1.setBackground(background);
         
         // Bottom pane
-        HBox bottomPane = new HBox(addButton, addAllButton, backButton);
+        HBox bottomPane = new HBox(addButton, addAllButton, backButton,backToMainPageButton);
         bottomPane.setPadding(new Insets(20,20,20,20));
         
         // Center pane
@@ -292,7 +341,6 @@ public class AutomatedSortingChest extends Application {
     }
     
     public static void main(String[] args) throws FileNotFoundException {
-        backgroundImage = new Image(new FileInputStream("background.jpeg"));
         Item[] items = new Item[9];
         items[0] = new Item("Axes", "Tools");
         items[1] = new Item("Shovels", "Tools");
@@ -339,11 +387,7 @@ public class AutomatedSortingChest extends Application {
             this.ItemName = item;
             if (getImage(item) != null) {
                 System.out.println(getImage(item));
-                try {
-                    itemImage = new Image(new FileInputStream(getImage(item)));
-                } catch (FileNotFoundException ex) {
-                    System.out.println("File doesn't exist.");
-                }
+                itemImage = new Image(getClass().getResourceAsStream(imageFilePath+ getImage(item)));
             }else {
                 System.out.println("Image " + item + " not found");
             }

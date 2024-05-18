@@ -143,7 +143,26 @@ public class MainSceneController implements Initializable {
             e.printStackTrace();
         }
     }
-
+    @FXML
+    private void switchToTeleportationNetwork(ActionEvent event) {
+         TeleportationNetworkController_GUI teleportationNetwork = new TeleportationNetworkController_GUI();
+        try {
+            teleportationNetwork.start((Stage) ((Button) event.getSource()).getScene().getWindow());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @FXML
+    private void switchToAutomatedSortingChest(ActionEvent event) {
+         AutomatedSortingChest sortedChest = new AutomatedSortingChest();
+        try {
+            sortedChest.start((Stage) ((Button) event.getSource()).getScene().getWindow());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     @FXML
     private void switchToAdventurerDiary(ActionEvent event) {
         URL fxmlUrl = null;
@@ -170,6 +189,9 @@ public class MainSceneController implements Initializable {
             e.printStackTrace();
         }
     }
+    
+    
+    
 
 //    @FXML
     private void switchToAutoFarmerBlock(ActionEvent event) {
@@ -196,5 +218,7 @@ public class MainSceneController implements Initializable {
 //            }
 //            e.printStackTrace();
 //        }
+
     }
+    
 }
