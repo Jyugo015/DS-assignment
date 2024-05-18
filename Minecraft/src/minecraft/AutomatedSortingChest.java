@@ -235,11 +235,14 @@ public class AutomatedSortingChest extends Application {
         Text unsortedItemText = new Text("Name of new item to add: ");
         
         ObservableList<String> itemsObservableValue = FXCollections.observableArrayList();
+        itemsObservableValue.clear();
         System.out.println("Size of list view: " + itemsObservableValue.size());
         for (int i = 0; i < unsortedItemNameArrayList.size(); i++) {
             itemsObservableValue.add(unsortedItemNameArrayList.get(i) + " (" + unsortedItemQuantityArrayList.get(i) + ")");
         }
+        System.out.println("Size of list view after: " + itemsObservableValue.size());
         ListView<String> itemsListView = new ListView<>();
+        
         itemsListView.getItems().addAll(itemsObservableValue);
         itemsListView.setPrefWidth(150);
         itemsListView.setPrefHeight(200);
@@ -341,35 +344,35 @@ public class AutomatedSortingChest extends Application {
     }
     
     public static void main(String[] args) throws FileNotFoundException {
-        Item[] items = new Item[9];
-        items[0] = new Item("Axes", "Tools");
-        items[1] = new Item("Shovels", "Tools");
-        items[2] = new Item("Apple", "Food");
-        items[3] = new Item("Clownfish", "Food");
-        items[4] = new Item("Swords", "Weapons");
-        items[5] = new Item("Diamond", "Materials");
-        items[6] = new Item("Potion of Decay", "Potions");
-        items[7] = new Item("Potion of Invisibility", "Potions");
-        items[8] = new Item("Bucket", "Tools");
-        
-        
-        for (int i = 0; i < items.length; i++) {
-            bst.add(items[i]);
-        }
-        bst.add(items[0],100);
-        
-        unsortedItemNameArrayList.add("Axes");
-        unsortedItemNameArrayList.add("Wood");
-        unsortedItemNameArrayList.add("Stone");
-        unsortedItemNameArrayList.add("Red stone");
-        unsortedItemQuantityArrayList.add(10);
-        unsortedItemQuantityArrayList.add(20);
-        unsortedItemQuantityArrayList.add(30);
-        unsortedItemQuantityArrayList.add(40);
-        unsortedItemCategoryArrayList.add("Tools");
-        unsortedItemCategoryArrayList.add("Materials");
-        unsortedItemCategoryArrayList.add("Materials");
-        unsortedItemCategoryArrayList.add("Materials");
+//        Item[] items = new Item[9];
+//        items[0] = new Item("Axes", "Tools");
+//        items[1] = new Item("Shovels", "Tools");
+//        items[2] = new Item("Apple", "Food");
+//        items[3] = new Item("Clownfish", "Food");
+//        items[4] = new Item("Swords", "Weapons");
+//        items[5] = new Item("Diamond", "Materials");
+//        items[6] = new Item("Potion of Decay", "Potions");
+//        items[7] = new Item("Potion of Invisibility", "Potions");
+//        items[8] = new Item("Bucket", "Tools");
+//        
+//        
+//        for (int i = 0; i < items.length; i++) {
+//            bst.add(items[i]);
+//        }
+//        bst.add(items[0],100);
+//        
+//        unsortedItemNameArrayList.add("Axes");
+//        unsortedItemNameArrayList.add("Wood");
+//        unsortedItemNameArrayList.add("Stone");
+//        unsortedItemNameArrayList.add("Red stone");
+//        unsortedItemQuantityArrayList.add(10);
+//        unsortedItemQuantityArrayList.add(20);
+//        unsortedItemQuantityArrayList.add(30);
+//        unsortedItemQuantityArrayList.add(40);
+//        unsortedItemCategoryArrayList.add("Tools");
+//        unsortedItemCategoryArrayList.add("Materials");
+//        unsortedItemCategoryArrayList.add("Materials");
+//        unsortedItemCategoryArrayList.add("Materials");
         
         launch(args);
     }
