@@ -28,7 +28,7 @@ public class database_item1 {
         Connection connection = DriverManager.getConnection(url, username, password);
         return connection;
     }
-
+    
     public static ArrayList<String> retrieveItem(String user) throws SQLException{
         ArrayList<String> record = new ArrayList<String>();
         Connection connection = getConnection();

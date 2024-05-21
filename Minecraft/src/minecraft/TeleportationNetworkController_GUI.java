@@ -1,14 +1,27 @@
 package minecraft;
 
+import java.awt.Desktop;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -28,24 +41,28 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import javax.swing.JButton;
 import minecraft.TeleportationNetworkController;
 import minecraft.TeleportationNetworkController.Edge;
 import minecraft.TeleportationNetworkController.Point;
 
+// float
 
 public class TeleportationNetworkController_GUI extends Application {
     private static TeleportationNetworkController network1= new TeleportationNetworkController();;
     private static String imageFilePath = "/minecraft/icon/";
     private static Image defaultImage;
     private static Image mapImage;
-    private static double r = 20;
+    private static float r = 20;
     private static ArrayList<SingleTeleportationPoint> points = new ArrayList<>();
 
     private static Stage stage = new Stage(); 
     private static BorderPane pane1; 
     private static String[] nodesName = {"A","B","C","D"};
-    private static String[] nodesImages = {"A.jpg", "B.jpg", "C.jpg", "D.jpg"};
+    private static String[] nodesImages = {"C:/Users/PC/Documents/UMHomework/y1s2/WIA1002 DS/Assignment/DS-assignment/Minecraft/src/minecraft/icon/A.jpg","C:/Users/PC/Documents/UMHomework/y1s2/WIA1002 DS/Assignment/DS-assignment/Minecraft/src/minecraft/icon/B.jpg","C:/Users/PC/Documents/UMHomework/y1s2/WIA1002 DS/Assignment/DS-assignment/Minecraft/src/minecraft/icon/C.jpg","C:/Users/PC/Documents/UMHomework/y1s2/WIA1002 DS/Assignment/DS-assignment/Minecraft/src/minecraft/icon/D.jpg"};
     private static boolean isSelected = false;
     private static boolean selectionMode = false;
     private static boolean addingNewNode = false;
@@ -366,6 +383,16 @@ public class TeleportationNetworkController_GUI extends Application {
             mainScene();
         });
         
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>(){
+            @Override
+            public void handle(WindowEvent t) {
+                pane1.setDisable(false);
+                stage.close();
+                reminder.setText("Opps! You failed in creating a new point!");
+                mainScene();            
+            }
+        });
+        
         stage.setScene(new Scene(pane));
         stage.setTitle("Construct your new teleportation point");
         stage.show();
@@ -397,6 +424,15 @@ public class TeleportationNetworkController_GUI extends Application {
             mainScene();
         });
         
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>(){
+            @Override
+            public void handle(WindowEvent t) {
+                stage.close();
+                reminder.setText("Congratulation " + username + "! You have sucessfully create a new point!");
+                mainScene();
+            }
+        });
+        
         stage.setScene(new Scene(pane));
         stage.show();
         
@@ -423,8 +459,8 @@ public class TeleportationNetworkController_GUI extends Application {
         // Click action to add a new node
         Pane pane = new Network();
         pane.setOnMouseClicked(e->{
-            double x = e.getX();
-            double y = e.getY();
+            float x = (float)e.getX();
+            float y = (float)e.getY();
             if (x>= r && x <= pane.getWidth()-r && y>= r && y <= pane.getHeight()-r) {
                 boolean canBeAdded = true;
                 
@@ -468,23 +504,26 @@ public class TeleportationNetworkController_GUI extends Application {
     }
     
     private static class SingleTeleportationPoint extends Pane{
-        Image image = defaultImage;
+        ImagePattern image = new ImagePattern(defaultImage);
         Point point;
         boolean canSelect;
         Button goButton = new Button("GO!!!");
         Button noButton = new Button("Nope, just take a look"); 
-        
+        JButton uploadFileButton = new JButton("Update now!");
         Circle circleFrame = new Circle(r);
         Circle filter = new Circle(r);
         public SingleTeleportationPoint(Point point) {
             this.point = point;
             
             if (getImage(getNodeName()) != null) {
-                image = getImage(getNodeName());
+                image = new ImagePattern(getImage(getNodeName()));
             }
-
-            circleFrame.setFill(new ImagePattern(image));
-                filter.setFill(Color.rgb(255, 0, 0, this.equals(currentlySelected)? 0.3 : 0));
+            // Bind the circle fill with the imageview
+            ObjectProperty<ImagePattern> imagePatternProperty = new SimpleObjectProperty<>();
+            imagePatternProperty.set(image);
+            circleFrame.fillProperty().bind(imagePatternProperty);
+//            circleFrame.setFill(new ImagePattern(image));
+            filter.setFill(Color.rgb(255, 0, 0, this.equals(currentlySelected)? 0.3 : 0));
             
             
             getChildren().addAll(circleFrame, filter);
@@ -510,11 +549,15 @@ public class TeleportationNetworkController_GUI extends Application {
                     System.out.println("not selection mode");
                     pane1.setRight(new VBox());
                     pane1.setBottom(new HBox());
+                    System.out.println("currntlySelected: " + currentlySelected);
                     if (currentlySelected != null) {
                         currentlySelected.filter.setFill(Color.TRANSPARENT); 
                         currentlySelected.circleFrame.setOpacity(1);
+                        System.out.println("here");
                     }
                     currentlySelected = this;
+                    System.out.println("currentlySelected: " + currentlySelected);
+                    
                     filter.setFill(Color.rgb(255, 0, 0,0.3));
                     System.out.println("current point: " + currentPoint);
                     if (username.equals(getOwnerName())) { // this node is owned by the current user
@@ -535,7 +578,7 @@ public class TeleportationNetworkController_GUI extends Application {
                                     System.out.println("i: " + i);
                                     text += (shortestPath.get(i)+" -> ");
                                 }
-                                text += shortestPath.get(0) + " with length of " + network1.shortestDistance(currentPoint.getNodeName(), getNodeName())+ ". Do you want to go? ";
+                                text += shortestPath.get(0) + " with length of " + String.format("%.2f", network1.shortestDistance(currentPoint.getNodeName(), getNodeName()))+ ". Do you want to go? ";
                                 reminder.setText(text);
                                 System.out.println("text: " + text);
                                 pane1.setTop(reminder);
@@ -571,7 +614,7 @@ public class TeleportationNetworkController_GUI extends Application {
             mainScene();
         }
         
-        public void reviewNode() {
+        public void reviewNode(){
             reminder.setText("");
             reset();
             
@@ -579,10 +622,13 @@ public class TeleportationNetworkController_GUI extends Application {
             Text neighbourText = new Text("Neighbour: " + getNeighbours().toString());
             Button addNeigbourButton = new Button("Add neighbour");
             Button removeNeigbourButton = new Button("Remove neighbour");
-            Button updateImageButton = new Button("Update point's image");
+            Button updateImageButton = new Button("Update image of teleportation point ");
             Button goButton = new Button("GO!!!");
             Button backButton = new Button("Review done!");
+           
+            
             VBox pane = new VBox(nameText, neighbourText,addNeigbourButton,removeNeigbourButton,goButton,updateImageButton, backButton);
+            updateImageButton.setDisable(false);
             pane1.setRight(pane);
             
             addNeigbourButton.setOnAction(e->{
@@ -602,11 +648,35 @@ public class TeleportationNetworkController_GUI extends Application {
                 goNewPoint();
             });
             
+            FileChooser.ExtensionFilter filter1 = new FileChooser.ExtensionFilter("Image files", Arrays.asList(new String[]{"*.png","*.jpg","*.jpeg"}));
             //---------------------------------------------------------------------------
             updateImageButton.setOnAction(e->{
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Choose the image for your node.");
+                fileChooser.setInitialDirectory(new File("C:"));
+                fileChooser.getExtensionFilters().add(filter1);
+                File selectedFile = fileChooser.showOpenDialog(null);
                 
+                if (selectedFile != null) {
+                    System.out.println("Saved");
+                    String filePath = selectedFile.getAbsolutePath();
+                    System.out.println("path: " + filePath);
+                    nodesImages[getIndex(currentlySelected.getNodeName())] = filePath;
+//                        currentlySelected.circleFrame.setFill(new ImagePattern(new Image(new FileInputStream(new File(filePath)))));
+                    System.out.println("currently selected: " + currentlySelected);
+                    reviewNode();
+                }
             });
-            //---------------------------------------------------------------------------
+            
+        }
+        
+        public static int getIndex(String nodeName) {
+            for (int i = 0; i < nodesImages.length; i++) {
+                if (nodesName[i].equals(nodeName)) {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         public String getNodeName() {
@@ -634,7 +704,11 @@ public class TeleportationNetworkController_GUI extends Application {
 //                System.out.println(itemsCollections[i]);
             }
             if (index >= 0 && index < nodesName.length) {
-                return new Image(getClass().getResourceAsStream(imageFilePath +nodesImages[index]));
+                try {
+                    return new Image(new FileInputStream(new File(nodesImages[index])));
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(TeleportationNetworkController_GUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             
             return null;
@@ -675,7 +749,7 @@ public class TeleportationNetworkController_GUI extends Application {
                     point.filter.setFill(Color.rgb(0, 255, 0,0.5));
                     point.circleFrame.setOpacity(0.8);
                 } else if (currentlySelected != null && point.getNodeName().equals(currentlySelected.getNodeName())) {
-                    point.filter.setFill(Color.rgb(0, 0, 255,0.5));
+                    point.filter.setFill(Color.rgb(255,0, 0, 0.5));
                     point.canSelect  = false;
                     point.circleFrame.setOpacity(0.8);
                 }

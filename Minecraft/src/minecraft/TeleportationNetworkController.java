@@ -392,7 +392,5 @@ public class TeleportationNetworkController {
         public String toString() {
             return String.format("%s, %s, %.3f%n", n1.nameOfTeleportationPoint, n2.nameOfTeleportationPoint, distance);
         }
-        
-        
     }
 }
