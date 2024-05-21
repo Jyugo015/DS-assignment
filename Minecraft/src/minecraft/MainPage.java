@@ -20,9 +20,9 @@ public class MainPage extends Application {
     
     @Override
     public void start(Stage stage) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("MainScene.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("Login.fxml"));
         Scene scene = new Scene (root);
-        stage.setTitle("Minecraft");
+        stage.setTitle("Login");
         Image icon = new Image(getClass().getResourceAsStream("/minecraft/icon/Minecraft.png"));
         stage.getIcons().add(icon);
         stage.setScene(scene);
