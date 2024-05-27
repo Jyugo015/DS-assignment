@@ -55,5 +55,7 @@
             <Image url="@icon/Auto-Farmer%20Block.png" />
          </image>
       </ImageView>
+      <Button layoutX="145.0" layoutY="191.0" mnemonicParsing="false" onAction="#switchToTeleportationNetwork" text="Teleportation Network Controller" />
+      <Button layoutX="158.0" layoutY="268.0" mnemonicParsing="false" onAction="#switchToAutomatedSortingChest" text="Automated Sorting Chest" />
    </children>
 </AnchorPane>

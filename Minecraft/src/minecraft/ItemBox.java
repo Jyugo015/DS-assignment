@@ -7,12 +7,11 @@ import java.util.stream.Collectors;
 
 public class ItemBox{
     public ArrayList<EnderBackpackItem> list = new ArrayList<EnderBackpackItem>();
-    public String username;
+    public String username = "defaultUser";
 
-    
     public ItemBox(String username) throws SQLException{
-        ArrayList<String> itemNamelist = new ArrayList<String>();
-        itemNamelist = database_itemBox.retrieveItem("defaultUser");
+        ArrayList<String> itemNamelist = new ArrayList<>();
+        itemNamelist = database_itemBox.retrieveItem(username);
         for (int i=0;i<itemNamelist.size();i++){
             this.addItem(new EnderBackpackItem(itemNamelist.get(i), "itemBox"),0);
         }
