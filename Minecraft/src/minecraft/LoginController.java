@@ -137,4 +137,18 @@ public class LoginController implements Initializable {
         emailError.setText("");
         passwordError.setText("");
     }
+     
+    @FXML
+    protected void handleForgotPasswordButtonAction(ActionEvent event) {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("ForgotPassword.fxml"));
+            Scene scene = new Scene(root);
+            Stage stage = new Stage();
+            stage.setTitle("Forgot Password");
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
