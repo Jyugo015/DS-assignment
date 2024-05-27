@@ -1,5 +1,7 @@
 package minecraft;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -71,7 +73,7 @@ public class AutomatedSortingChest extends Application {
     private static String username;
     
     @Override
-    public void start(Stage primaryStage) throws SQLException {
+    public void start(Stage primaryStage) throws SQLException, FileNotFoundException {
         username = "defaultUser";
         unsortedBox = new ItemBox(username);
         unsortedEnderBackpackItemNameArrayList.clear();
@@ -114,6 +116,7 @@ public class AutomatedSortingChest extends Application {
         });
         
         backgroundImage = new Image(getClass().getResourceAsStream("/minecraft/icon/background.jpeg"));
+//        backgroundImage = new Image(new FileInputStream(new File("C:\\Users\\PC\\Favorites\\Downloads\\Powder Snow Bucket.png")));
         stage = primaryStage;
         stage.setTitle("Automated Sorting Chest");
         stage.setScene(scene1());
