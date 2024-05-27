@@ -16,7 +16,7 @@ public class UserDatabase {
 
     public static boolean addUser(User user) {
         if (usersByEmail.containsKey(user.getEmail())) {
-            return false; 
+            return false;
         }
         usersByEmail.put(user.getEmail(), user);
         return true;
@@ -25,11 +25,18 @@ public class UserDatabase {
     public static User getUserByEmail(String email) {
         return usersByEmail.get(email);
     }
-    
+
     public static User getUserByUsernameAndPassword(String username, String hashedPassword) {
         return usersByEmail.values().stream()
                 .filter(user -> user.getUsername().equals(username) && user.getHashedPassword().equals(hashedPassword))
                 .findFirst()
                 .orElse(null);
+    }
+    
+    public static void updateUserPassword(String email, String newHashedPassword) {
+        User user = usersByEmail.get(email);
+        if (user != null) {
+            user.setHashedPassword(newHashedPassword);
+        }
     }
 }

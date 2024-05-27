@@ -4,6 +4,10 @@
  */
 package minecraft;
 
+import java.awt.Desktop;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
@@ -176,8 +180,125 @@ public class AdventurerDiaryController implements Initializable {
     }
 
     private void shareEntry(int entryId) {
-        String sharedEvent = diary.shareEntry(entryId);
-        System.out.println("Shared Entry: " + sharedEvent);
+        String entryText = diary.getEntries().get(entryId);
+        if (entryText != null) {
+            Dialog<Void> dialog = new Dialog<>();
+            dialog.setTitle("Share Entry");
+
+            VBox dialogVbox = new VBox(20);
+            Button shareWhatsAppButton = new Button("Share WhatsApp");
+            Button shareTelegramButton = new Button("Share Telegram");
+            Button shareFacebookButton = new Button("Share Facebook");
+            Button shareTwitterButton = new Button("Share Twitter");
+
+            // Set actions for share buttons
+            shareWhatsAppButton.setOnAction(event -> shareViaWhatsApp(entryText));
+            shareTelegramButton.setOnAction(event -> shareViaTelegram(entryText));
+            shareFacebookButton.setOnAction(event -> shareViaFacebook(entryText));
+            shareTwitterButton.setOnAction(event -> shareViaTwitter(entryText));
+
+            dialogVbox.getChildren().addAll(
+                    new Label("Choose a platform to share the entry:"),
+                    shareWhatsAppButton,
+                    shareTelegramButton,
+                    shareFacebookButton,
+                    shareTwitterButton
+            );
+
+            dialog.getDialogPane().setContent(dialogVbox);
+
+            // Add a close button
+            ButtonType closeButtonType = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
+            dialog.getDialogPane().getButtonTypes().add(closeButtonType);
+
+            dialog.showAndWait();
+        } else {
+            System.out.println("Invalid entry ID.");
+        }
+    }
+
+    private void shareViaWhatsApp(String entryText) {
+
+        String text = entryText;
+        String[] token = text.split(" ");
+        String finalTextInURL = new String();
+        for (String string : token) {
+            finalTextInURL += string + "%20";
+        }
+        String url = "https://wa.me/?text=" + "https://www.minecraft.net/en-us%0A" + finalTextInURL;
+        System.out.println(url);
+        try {
+            Desktop.getDesktop().browse(new URI(url));
+        } catch (IOException ex) {
+            System.out.println("Link not found");
+        } catch (URISyntaxException ex) {
+            System.out.println("URI exception");
+        }
+
+    }
+
+    private void shareViaTelegram(String entryText) {
+
+        String text = entryText;
+        String[] token = text.split(" ");
+        String finalTextInURL = new String();
+        for (String string : token) {
+            finalTextInURL += string + "%20";
+        }
+        String url = "https://t.me/share/url?url=https://www.minecraft.net/en-us" + "&text=" + finalTextInURL;
+        System.out.println(url);
+        try {
+            Desktop.getDesktop().browse(new URI(url));
+        } catch (IOException ex) {
+            System.out.println("Link not found");
+        } catch (URISyntaxException ex) {
+            System.out.println("URI exception");
+        }
+
+    }
+
+    private void shareViaFacebook(String entryText) {
+        String text = entryText;
+        String[] token = text.split(" ");
+        String finalTextInURL = new String();
+        for (String string : token) {
+            finalTextInURL += string + "%20";
+        }
+        String picURL = "https://play-lh.googleusercontent.com/VEY2MWVlUXIzyL-5KYAeOVAEICyd_C5TbK81-d5b9x7b3SPDOGzkFo59wLvqsadrMQ=w2560-h1440-rw";
+        String url = "http://www.facebook.com/dialog/feed?"
+                + "app_id=145634995501895&"
+                + "hashtag=" + finalTextInURL + "%0A%23MincecraftGO&"
+                + "link=https://www.minecraft.net/en-us&"
+                + "picture=" + picURL;
+        System.out.println(url);
+        try {
+            Desktop.getDesktop().browse(new URI(url));
+        } catch (IOException ex) {
+            System.out.println("Link not found");
+        } catch (URISyntaxException ex) {
+            System.out.println("URI exception");
+        }
+
+    }
+
+    private void shareViaTwitter(String entryText) {
+
+        String text = entryText;
+        String[] token = text.split(" ");
+        String finalTextInURL = new String();
+        for (String string : token) {
+            finalTextInURL += string + "%20";
+        }
+        String url = "https://twitter.com/intent/tweet?text=" + finalTextInURL + "%0Ahttps://www.minecraft.net/en-us%0A&hashtags=MinecraftGO";
+        System.out.println(url);
+        try {
+            Desktop.getDesktop().browse(new URI(url));
+        } catch (IOException ex) {
+            System.out.println("Link not found");
+        } catch (URISyntaxException ex) {
+            System.out.println("URI exception");
+        }
+
     }
 
     private void displayEntries() {
