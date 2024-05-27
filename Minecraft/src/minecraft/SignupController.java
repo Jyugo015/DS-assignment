@@ -6,6 +6,7 @@ package minecraft;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.SecureRandom;
 import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
 import javafx.event.ActionEvent;
@@ -44,6 +45,9 @@ public class SignupController implements Initializable {
     private Label passwordError;
     @FXML
     private Label confirmPasswordError;
+    
+    private String verificationCode;    
+    
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -95,23 +99,37 @@ public class SignupController implements Initializable {
         if (hasError) {
             return;
         }
-        
-        //Password hashing(database存这个，不要存普通的password）！！
-        String hashedPassword = PasswordHash.hashPassword(password);
-        User newUser = new User(username, email, hashedPassword);
-        boolean userAdded = UserDatabase.addUser(newUser);
-
-        if (userAdded) {
-            System.out.println("User signed up: " + username + ", " + email);
-        } else {
-            confirmPasswordError.setText("An error occurred during signup.");
+        // Generate a verification code
+        verificationCode = generateVerificationCode();
+        try {
+            GmailService.sendVerificationEmail(email, verificationCode);
+        } catch (Exception e) {
+            emailError.setText("Failed to send verification email.");
+            e.printStackTrace();
+            return;
         }
-  
-        //这里signup过后会切回去login，然后通过login去main scene 
-        Parent root = FXMLLoader.load(getClass().getResource("Login.fxml"));
-        Scene loginScene = new Scene(root);
-        Stage stage = (Stage) usernameField.getScene().getWindow();
-        stage.setScene(loginScene);
+
+        // Show verification code input dialog
+        showVerificationDialog(email, username, password);
+    }
+
+    private String generateVerificationCode() {
+        SecureRandom random = new SecureRandom();
+        int code = random.nextInt(999999);
+        return String.format("%06d", code);
+    }
+
+    private void showVerificationDialog(String email, String username, String password) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Verification.fxml"));
+        Parent root = loader.load();
+        VerificationController controller = loader.getController();
+        controller.setSignupController(this);
+        controller.setEmail(email);
+        controller.setUsername(username);
+        controller.setPassword(password);
+        Stage stage = new Stage();
+        stage.setScene(new Scene(root));
+        stage.show();
     }
 
     @FXML
@@ -130,6 +148,31 @@ public class SignupController implements Initializable {
         usernameError.setText("");
         emailError.setText("");
         passwordError.setText("");
+    }
+    
+     public boolean verifyCode(String inputCode) {
+        return verificationCode.equals(inputCode);
+    }
+
+    public void completeSignup(String email, String username, String password) {
+        String hashedPassword = PasswordHash.hashPassword(password);
+        User newUser = new User(username, email, hashedPassword);
+        boolean userAdded = UserDatabase.addUser(newUser);
+
+        if (userAdded) {
+            System.out.println("User signed up: " + username + ", " + email);
+            // Navigate back to login
+            try {
+                Parent root = FXMLLoader.load(getClass().getResource("Login.fxml"));
+                Scene loginScene = new Scene(root);
+                Stage stage = (Stage) usernameField.getScene().getWindow();
+                stage.setScene(loginScene);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            confirmPasswordError.setText("An error occurred during signup.");
+        }
     }
 
 }
