@@ -1,5 +1,6 @@
 package minecraft;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,9 +10,40 @@ public class TeleportationNetworkController {
     private static List<List<Edge>> adjacencyList = new ArrayList<>();
     private static List<Edge> edges = new ArrayList<>();
     
-    public boolean addNewNode(Point newNode) {
+    public static boolean restoreNode(ArrayList<Point> nodesFromDB) throws SQLException {
+        for (Point p : nodesFromDB) {
+            boolean inDatabaseDuplicated = false;
+            for (Point pHad : nodes) {
+                 if (pHad.getNameOfTeleportationPoint().equals(p.getNameOfTeleportationPoint())) {
+                     inDatabaseDuplicated = true;
+                     break;
+                }
+            }
+            if (! inDatabaseDuplicated) {
+                nodes.add(new Point(p.nameOfTeleportationPoint, p.owner, p.x, p.y, null, p.friendRequestsReceived, p.friendWaitingAcceptance));
+                System.out.println(nodesFromDB.get(nodesFromDB.size()-1).friendRequestsReceived);
+                System.out.println(nodesFromDB.get(nodesFromDB.size()-1).friendWaitingAcceptance);
+                adjacencyList.add(new ArrayList<>());
+            } else {
+                database_item5.removeteleportationPoint(p.getNameOfTeleportationPoint());
+            }
+           
+        }
+        for (Point p : nodes) {
+            ArrayList<String> neighbour = database_item5.retrieveNeighbour(p.getNameOfTeleportationPoint());
+            if (neighbour!=null && ! neighbour.isEmpty()) {
+                for (String n : neighbour) {
+                    p.addNeighbour(n);
+                    System.out.println("Add neighbour: " + p.neighbours);
+                }
+            }
+        }
+        return true;
+    }
+    
+    public static boolean addNewNode(Point newNode) throws SQLException{
         for (int i = 0; i < nodes.size(); i++) {
-            if (nodes.get(i).getNameOfTeleportationPoint().equals(newNode.getNameOfTeleportationPoint())) {
+            if (nodes.contains(newNode)) {
                 System.out.println("The teleportaton point with same name exist already. Please try a new name");
                 return false;
             } else if (nodes.get(i).getX() == newNode.getX() && nodes.get(i).getY() == newNode.getY()) {
@@ -21,25 +53,29 @@ public class TeleportationNetworkController {
                 return false;
             }
         }
+        System.out.println("newNode: " +newNode);
         nodes.add(newNode);
+        database_item5.addteleportationPoint(newNode.nameOfTeleportationPoint, newNode.owner, newNode.x, newNode.y);
         adjacencyList.add(new ArrayList<>());
         System.out.println(adjacencyList.size());
         return true;
     }
     
-    public boolean removeNode(Point node) {
-        int indexCurrent = getIndex(node);
+    public static boolean removeNode(String nodeName) throws SQLException {
+        Point node = getNode(nodeName);
+        int indexCurrent = getIndex(node.nameOfTeleportationPoint);
         if (indexCurrent != -1) {
             long startTime = System.currentTimeMillis();
             // remove neigbour's neigbours(current) from neighbour
-            for (Point n : nodes.get(indexCurrent).getNeighbours()) {
-                for (int j = 0; j < n.neighbours.size() ; j++) {
-                    if (n.neighbours.get(j).nameOfTeleportationPoint.equals(node.nameOfTeleportationPoint)) {
-                        n.neighbours.remove(j); // removeffrom neighbour list
+            for (String n : nodes.get(indexCurrent).getNeighbours()) {
+                Point neighbour = getNode(n);
+                for (int j = 0; j < neighbour.neighbours.size() ; j++) {
+                    if (neighbour.neighbours.get(j).equals(node.nameOfTeleportationPoint)) {
+                        neighbour.neighbours.remove(j); // remove from neighbour list
                         break;
                     }
                 }
-                int indexNeighbour= getIndex(n); // find neighbour index
+                int indexNeighbour= getIndex(neighbour.nameOfTeleportationPoint); // find neighbour index
                 for (int i = 0; i <  adjacencyList.get(indexNeighbour).size() ; i++) {
                     if (adjacencyList.get(indexNeighbour).get(i).n2.nameOfTeleportationPoint.equals(node.getNameOfTeleportationPoint())) {
                         adjacencyList.get(indexNeighbour).remove(i); // remove from adjacency list
@@ -50,8 +86,17 @@ public class TeleportationNetworkController {
             }
             adjacencyList.remove(indexCurrent); // remove the whole adjacency list
             System.out.println("Time taken to remove multiple edges: " + (System.currentTimeMillis() - startTime));
+            
+            // remove the friend request from the other requested friend
+            for (String requstedNode: node.friendWaitingAcceptance) {
+                Point n = getNode(requstedNode);
+                n.friendRequestsReceived.remove(node.getNameOfTeleportationPoint());
+                database_item5.setRequestGet(requstedNode, n.friendRequestsReceived);
+            }
+            
             nodes.remove(node);
             node.neighbours.clear();
+            database_item5.removeteleportationPoint(nodeName);
             // remove the single edges
             startTime = System.currentTimeMillis();
             for (int j = 0; j < edges.size(); j++) {
@@ -66,53 +111,40 @@ public class TeleportationNetworkController {
         }
         return false;
     }
-//    public boolean addNewNeighbour(Node TeleportationPoint, Node neighbours) {
-//        return TeleportationPoint.addNeighbours(neighbours);
-//    }
-//    
-//    public boolean removeNeighbour(Node TeleportationPoint, Node neighbour) {
-//        boolean isRemoved = TeleportationPoint.removeNeighbour(neighbour);
-//        System.out.println(((isRemoved) ? ("The neighbour is removed. Contains? " + TeleportationPoint.neighbours.contains(neighbour)) : "The neighbour doesn't belongs to the teleportation point"));
-//        return isRemoved;
-//    }
-//    
-
+    
     public static List<Edge> getEdges() {
         return edges;
     }
     
-    public ArrayList<Point> getNeighbours(String nodename) {
+    public static ArrayList<String> getNeighbours(String nodename) {
         Point node = getNode(nodename);
         if (node != null && ! node.neighbours.isEmpty()) {
             System.out.print("Neighbour of nodes " + node.getNameOfTeleportationPoint() + " are: ");
             int sizeNeighbour = node.getNeighbours().size();
             for (int i = 0; i< sizeNeighbour-1; i++) {
-                System.out.print(node.getNeighbours().get(i).getNameOfTeleportationPoint() + ", ");
+                System.out.print(node.getNeighbours().get(i) + ", ");
             } 
-            System.out.println(" and " + node.getNeighbours().get(sizeNeighbour-1).getNameOfTeleportationPoint());
+            System.out.println(" and " + node.getNeighbours().get(sizeNeighbour-1));
             return node.neighbours;
             }
         return null;
     }
     
-    public boolean contains(Point nodeName) {
+    public static boolean contains(Point nodeName) {
         return getNode(nodeName.getNameOfTeleportationPoint()) != null;
     }
     
-    protected static int getIndex(Point node) {
+    protected static int getIndex(String nodeName) {
         for (int i = 0; i < nodes.size(); i++) {
-            if (nodes.get(i).equals(node)) {
+            if (nodes.get(i).nameOfTeleportationPoint.equals(nodeName)) {
 //                System.out.println("is equal");
                 return i;
             } 
-//            else {
-//                System.out.println(node.getNameOfTeleportationPoint().equals(nodes.get(i).getNameOfTeleportationPoint()));
-//            }
         }
         return -1;
     }
     
-    public int totalNodes() {
+    public static int totalNodes() {
         return nodes.size();
     }
 
@@ -120,21 +152,24 @@ public class TeleportationNetworkController {
         return adjacencyList;
     }
 
-    public List<Point> getNodes() {
+    public static List<Point> getNodes() {
         return nodes;
     }
     
     
     // bfs to find the number of connected nodes 
-    public ArrayList<Point> BFSnodesCanBeReached(Point teleportationPoint) {
+    public static ArrayList<Point> BFSnodesCanBeReached(Point teleportationPoint) {
         ArrayList<Point> reachableNode = new ArrayList<>();
         reachableNode.add(teleportationPoint);
-        reachableNode.addAll(teleportationPoint.neighbours);
+        for (String pName: teleportationPoint.neighbours) {
+            reachableNode.add(getNode(pName));
+        }
         for (int i = 1; i < reachableNode.size(); i++) {
             Point node = reachableNode.get(i);
-            for (Point node1 : node.getNeighbours()) {
-                if (!reachableNode.contains(node1)) {
-                    reachableNode.add(node1);
+            for (String pName: node.neighbours) {
+                Point neighbour = getNode(pName);
+                if (!reachableNode.contains(neighbour)) {
+                    reachableNode.add(neighbour);
                 }
             }
         }
@@ -151,7 +186,7 @@ public class TeleportationNetworkController {
         return null;
     }
     
-    public ArrayList<Point> shortestPath(String start, String dest) {
+    public static ArrayList<Point> shortestPath(String start, String dest) {
         Point currentPoint = getNode(start);
         Point destinationPoint = getNode(dest);
         if (! nodes.contains(destinationPoint) || ! nodes.contains(currentPoint)) {
@@ -184,7 +219,7 @@ public class TeleportationNetworkController {
             if (u != -1) {
                 visited.add(reachableNode.get(u));
            
-                for (Edge edge : adjacencyList.get(getIndex(reachableNode.get(u)))) {
+                for (Edge edge : adjacencyList.get(getIndex(reachableNode.get(u).getNameOfTeleportationPoint()))) {
                     for (int i = 0; i < size; i++) {
                         if (edge.n2.equals(reachableNode.get(i))) {
                            if (! visited.contains(reachableNode.get(i)) && distance[i] > distance[u] + edge.getDistance()) {
@@ -220,7 +255,7 @@ public class TeleportationNetworkController {
         return shortestPath;
     }
     
-    public double shortestDistance(String teleportationPoint, String destination) {
+    public static double shortestDistance(String teleportationPoint, String destination) {
         ArrayList<Point> shortestPath = shortestPath(teleportationPoint, destination);
         if (shortestPath == null) {
             return -1;
@@ -233,8 +268,8 @@ public class TeleportationNetworkController {
         return distance;
     }
     
-    public double getDistance(Point teleportationPoint, Point destination) {
-        for (Edge edge : adjacencyList.get(getIndex(teleportationPoint))) {
+    public static double getDistance(Point teleportationPoint, Point destination) {
+        for (Edge edge : adjacencyList.get(getIndex(teleportationPoint.getNameOfTeleportationPoint()))) {
             if (edge.n2.equals(destination)) {
                 System.out.println("Edge: " + edge);
                 return edge.distance;
@@ -243,7 +278,7 @@ public class TeleportationNetworkController {
         return -1;
     }
     
-    public ArrayList<Point> nodesOfOwner(String owner) {
+    public static ArrayList<Point> nodesOfOwner(String owner) {
         ArrayList<Point> belong = new ArrayList<>();
         for (Point node : nodes) {
             if (node.getOwner().equals(owner)) {
@@ -253,32 +288,99 @@ public class TeleportationNetworkController {
         return belong;
     }
     
+    
     public static class Point{
         private String nameOfTeleportationPoint;
-        private String owner;
-        private ArrayList<Point> neighbours = new ArrayList<>();
-        private double x;
-        private double y;
+        private final String owner;
+        private ArrayList<String> neighbours = new ArrayList<>();
+        private ArrayList<String> friendRequestsReceived;
+        private ArrayList<String> friendWaitingAcceptance ;
+        private final float x;
+        private final float y;
 
-        public Point(String nameOfTeleportationPoint, String owner, double x, double y) {
+        public Point(String nameOfTeleportationPoint, String owner, float x, float y, ArrayList<String> neighbours, ArrayList<String> friendRequestsReceived, ArrayList<String> friendWaitingAcceptance) {
             this.nameOfTeleportationPoint = nameOfTeleportationPoint;
             this.owner = owner;
             this.x = x;
             this.y = y;
+            if (neighbours!=null) {
+                for (String n : neighbours) {
+                    this.addNeighbour(n);
+                }
+            }
+            this.friendRequestsReceived = friendRequestsReceived == null ? new ArrayList<>() : friendRequestsReceived;
+            this.friendWaitingAcceptance = friendWaitingAcceptance == null ? new ArrayList<>() : friendWaitingAcceptance;
         }
 
+        public ArrayList<String> getFriendRequestsReceived() {
+            return friendRequestsReceived;
+        }
+
+        public ArrayList<String> getFriendWaitingAcceptance() {
+            return friendWaitingAcceptance;
+        }
+
+        public boolean sendFriendRequest(String requestReciepient) throws SQLException{
+            Point reciepient = getNode(requestReciepient);
+
+            if (reciepient !=null) {
+                // check if the request sent before // they are neigbours already
+                if (reciepient.friendRequestsReceived.contains(nameOfTeleportationPoint.trim()) || reciepient.neighbours.contains(nameOfTeleportationPoint)) {
+                    return false;
+                } else {
+                    reciepient.friendRequestsReceived.add(this.getNameOfTeleportationPoint());
+                    this.friendWaitingAcceptance.add(requestReciepient);
+                    System.out.println(reciepient + " accpeted " + reciepient.friendRequestsReceived);
+                    System.out.println( this + " sent " + friendWaitingAcceptance);
+                    database_item5.addRequestSent(nameOfTeleportationPoint, requestReciepient);
+                    database_item5.addRequestGet(requestReciepient, nameOfTeleportationPoint);
+                    System.out.println("sent in database" + database_item5.retrieveRequestSent(nameOfTeleportationPoint));
+                    System.out.println("get in database" + database_item5.retrieveRequestGet(requestReciepient));
+                    return true;
+                }
+            }
+            return false;
+        }
+    
+        public void acceptFriendRequest(String requestSender) throws SQLException{
+            Point sender = getNode(requestSender);
+
+            if (sender != null) {
+                // remove the request
+                friendRequestsReceived.remove(requestSender);
+                sender.friendWaitingAcceptance.remove(this.nameOfTeleportationPoint);
+                database_item5.setRequestSent(requestSender, sender.friendWaitingAcceptance);
+                database_item5.setRequestGet(nameOfTeleportationPoint, this.friendRequestsReceived);
+                database_item5.addNeighbour(requestSender, nameOfTeleportationPoint);
+                database_item5.addNeighbour(nameOfTeleportationPoint, requestSender);
+                sender.addNeighbour(this.nameOfTeleportationPoint);
+            }
+        }
+        
+        public void rejectFriendRequest(String requestSender) throws SQLException{
+            Point sender = getNode(requestSender);
+            if (sender != null) {
+                // remove the request
+                friendRequestsReceived.remove(requestSender);
+                sender.friendWaitingAcceptance.remove(this.getNameOfTeleportationPoint());
+                database_item5.setRequestSent(requestSender, sender.friendWaitingAcceptance);
+                database_item5.setRequestGet(nameOfTeleportationPoint, friendRequestsReceived);
+            }
+            
+        }
+        
         public String getOwner() {
             return owner;
         }
 
-        public ArrayList<Point> getNeighbours() {
+        public ArrayList<String> getNeighbours() {
             return neighbours;
         }
 
         public ArrayList<String> getNeighboursInString() {
             ArrayList<String> list = new ArrayList<>();
             for (int i = 0; i < neighbours.size(); i++) {
-                list.add(neighbours.get(i).getNameOfTeleportationPoint());
+                list.add(neighbours.get(i));
             }
             return list;
         }
@@ -287,50 +389,45 @@ public class TeleportationNetworkController {
             return nameOfTeleportationPoint;
         }
 
-        public double getX() {
+        public float getX() {
             return x;
         }
 
-        public double getY() {
+        public float getY() {
             return y;
         }
 
-        public boolean addNeighbour(String neighbourName) {
+        private boolean addNeighbour(String neighbourName) {
             Point neighbour = getNode(neighbourName);
-            if (neighbour.equals(this)) return false; // the node itself is not its neighbour
-            for (int i = 0; i < neighbours.size(); i++) {
-                if (neighbours.get(i).equals(neighbour)) {
-                    System.out.println("They are neighbour already");
-                    return false;
-                }
+            if (neighbour==null) return false;
+            if (neighbourName.equals(this)) return false; // the node itself is not its neighbour
+            if (neighbours.contains(neighbourName)) {
+                System.out.println(nameOfTeleportationPoint + " and " + neighbourName + " are neighbour already");
+                return false;
             }
             // both add each other as neighbour
-            neighbours.add(neighbour);
-            neighbour.neighbours.add(this);
+            System.out.println("neighbour of " + nameOfTeleportationPoint + " : " + neighbours);
+            System.out.println("neighbour of " + neighbourName + " : " + neighbour.neighbours);
+            neighbours.add(neighbourName);
+            neighbour.neighbours.add(nameOfTeleportationPoint);
             System.out.println("added");
             // create edge between them
-            adjacencyList.get(getIndex(this)).add(new Edge(this, neighbour));
-            adjacencyList.get(getIndex(neighbour)).add(new Edge(neighbour, this));
+            adjacencyList.get(getIndex(this.nameOfTeleportationPoint)).add(new Edge(this, neighbour));
+            adjacencyList.get(getIndex(neighbour.nameOfTeleportationPoint)).add(new Edge(neighbour, this));
             edges.add(new Edge(this, neighbour));
             return true;
         }
         
-        public void addNeighbours(String[] neighbourName){
-            for (String node : neighbourName) {
-                addNeighbour(node);
-            }
-        }
-        
-        public boolean removeNeighbour(String removedNeighbourName) {
+        public boolean removeNeighbour(String removedNeighbourName) throws SQLException{
             Point neighbour = getNode(removedNeighbourName);
-            int indexCurrent = getIndex(this);
+            int indexCurrent = getIndex(this.nameOfTeleportationPoint);
             if (neighbour != null) {
-                int indexNeighbour = getIndex(neighbour);
+                int indexNeighbour = getIndex(neighbour.nameOfTeleportationPoint);
                 // remove neighbour's adjacency list that N2 is this
                 for (int i = 0; i < adjacencyList.get(indexNeighbour).size(); i++) {
                     if (adjacencyList.get(indexNeighbour).get(i).getN2().equals(this)) {
                         adjacencyList.get(indexNeighbour).remove(i);
-                        nodes.get(indexNeighbour).neighbours.remove(this);
+                        nodes.get(indexNeighbour).neighbours.remove(this.getNameOfTeleportationPoint());
                         break;
                     }
                 }
@@ -338,7 +435,7 @@ public class TeleportationNetworkController {
                 for (int i = 0; i < adjacencyList.get(indexCurrent).size(); i++) {
                     if (adjacencyList.get(indexCurrent).get(i).getN2().equals(neighbour)) {
                         adjacencyList.get(indexCurrent).remove(i);
-                        nodes.get(indexCurrent).neighbours.remove(neighbour);
+                        nodes.get(indexCurrent).neighbours.remove(neighbour.getNameOfTeleportationPoint());
                         break;
                     }
                 }
@@ -350,22 +447,28 @@ public class TeleportationNetworkController {
                         i--;
                     }
                 }
-                
+                System.out.println("Is they still neighbour?:" + neighbour.neighbours.contains(nameOfTeleportationPoint));
+                database_item5.removeNeighbour(nameOfTeleportationPoint, removedNeighbourName);
+                database_item5.removeNeighbour(removedNeighbourName, nameOfTeleportationPoint);
                 return true;
             }
             return false;
         }
         
-        public void setNameOfTeleportationPoint(String nameOfTeleportationPoint) {
-            this.nameOfTeleportationPoint = nameOfTeleportationPoint;
-        }
+//        public boolean renameTeleportationPoint(String newName) {
+//            for (Point n:nodes) {
+//                if (n.getNameOfTeleportationPoint().equals(newName)) {
+//                    return false;
+//                }
+//            }
+//            this.nameOfTeleportationPoint = newName;
+//            return true;
+//        }
 
         @Override
         public String toString() {
             return nameOfTeleportationPoint ;
         }
-        
-            
     }
      
     public static class Edge{
@@ -395,7 +498,5 @@ public class TeleportationNetworkController {
         public String toString() {
             return String.format("%s, %s, %.3f%n", n1.nameOfTeleportationPoint, n2.nameOfTeleportationPoint, distance);
         }
-        
-        
     }
 }

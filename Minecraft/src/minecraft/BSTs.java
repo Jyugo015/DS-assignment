@@ -1,120 +1,95 @@
 package minecraft;
 
-public class BSTs<E extends Item>{
-    private static BinarySearchTree<Item> ALLTree = new BinarySearchTree<>();
-    private static BinarySearchTree<Item> toolsTree = new BinarySearchTree<>();
-    private static BinarySearchTree<Item> foodTree = new BinarySearchTree<>();
-    private static BinarySearchTree<Item> arrrorsTree = new BinarySearchTree<>();
-    private static BinarySearchTree<Item> decorationsTree = new BinarySearchTree<>();
-    private static BinarySearchTree<Item> mobEggsTree = new BinarySearchTree<>();
-    private static BinarySearchTree<Item> weaponsTree = new BinarySearchTree<>();
-    private static BinarySearchTree<Item> materialTree = new BinarySearchTree<>();
-    private static BinarySearchTree<Item> potionsTree = new BinarySearchTree<>();
-    private static BinarySearchTree<Item> recordsTree = new BinarySearchTree<>();
-    private static BinarySearchTree<Item> armorTree = new BinarySearchTree<>();
-    private static BinarySearchTree<Item> transportationsTree = new BinarySearchTree<>();
-    private static BinarySearchTree<Item> dyesTree = new BinarySearchTree<>();
+import java.sql.SQLException;
+
+public class BSTs<E extends EnderBackpackItem>{
+    String username = "defaultUser";
+    private BinarySearchTree<EnderBackpackItem> ALLTree = new BinarySearchTree<>(username);
+    private BinarySearchTree<EnderBackpackItem> toolsTree = new BinarySearchTree<>(username);
+    private BinarySearchTree<EnderBackpackItem> foodTree = new BinarySearchTree<>(username);
+    private BinarySearchTree<EnderBackpackItem> arrrorsTree = new BinarySearchTree<>(username);
+    private BinarySearchTree<EnderBackpackItem> decorationsTree = new BinarySearchTree<>(username);
+    private BinarySearchTree<EnderBackpackItem> mobEggsTree = new BinarySearchTree<>(username);
+    private BinarySearchTree<EnderBackpackItem> weaponsTree = new BinarySearchTree<>(username);
+    private BinarySearchTree<EnderBackpackItem> materialTree = new BinarySearchTree<>(username);
+    private BinarySearchTree<EnderBackpackItem> potionsTree = new BinarySearchTree<>(username);
+    private BinarySearchTree<EnderBackpackItem> recordsTree = new BinarySearchTree<>(username);
+    private BinarySearchTree<EnderBackpackItem> armorTree = new BinarySearchTree<>(username);
+    private BinarySearchTree<EnderBackpackItem> transportationsTree = new BinarySearchTree<>(username);
+    private BinarySearchTree<EnderBackpackItem> dyesTree = new BinarySearchTree<>(username);
 //    private static BinarySearchTree[] trees = {toolsTree,foodTree,armorTree,arrrorsTree,decorationsTree,mobEggsTree,weaponsTree,materialTree,potionsTree,recordsTree,transportationsTree,dyesTree,ALLTree};
     
-    public void add(Item item, int quantity) {
-        ALLTree.add(item,quantity);
-        switch (item.getCategory()) {
-            case "Tools" :toolsTree.add(item, quantity);  break;
-            case "Food" :foodTree.add(item, quantity); break;
-            case "Arrows" :arrrorsTree.add(item, quantity); break;
-            case "Decorations" :decorationsTree.add(item, quantity); break;
-            case "MobEggs" :mobEggsTree.add(item, quantity); break;
-            case "Weapons" :weaponsTree.add(item, quantity); break;
-            case "Armor" :armorTree.add(item, quantity); break;
-            case "Materials" :materialTree.add(item, quantity); break;
-            case "Transportations" :transportationsTree.add(item, quantity); break;
-            case "Potions" :potionsTree.add(item, quantity); break;
-            case "Records" :recordsTree.add(item, quantity); break;
-            case "Dyes" :dyesTree.add(item, quantity); break;
+    public void add(String EnderBackpackItemName, int quantity) throws SQLException {
+        EnderBackpackItem item = database_itemBox.getEnderBackpackItem(username, EnderBackpackItemName);
+        if (item.type == null) { // the item is not inside the itemBox
+            System.out.println("Type is null");
+            item = database_item4.getEnderBackpackItem(username, EnderBackpackItemName);
+        }
+        System.out.println("name: " + item.name);
+        System.out.println("type: " + item.type);
+        System.out.println("quantity: " + item.quantity);
+        ALLTree.add(EnderBackpackItemName,quantity);
+        switch (item.type) {
+            case "Tools" :toolsTree.add(EnderBackpackItemName, quantity); break;
+            case "Food" :foodTree.add(EnderBackpackItemName, quantity); break;
+            case "Arrows" :arrrorsTree.add(EnderBackpackItemName, quantity); break;
+            case "Decorations" :decorationsTree.add(EnderBackpackItemName, quantity); break;
+            case "MobEggs" :mobEggsTree.add(EnderBackpackItemName, quantity); break;
+            case "Weapons" :weaponsTree.add(EnderBackpackItemName, quantity); break;
+            case "Armor" :armorTree.add(EnderBackpackItemName, quantity); break;
+            case "Materials" :materialTree.add(EnderBackpackItemName, quantity); break;
+            case "Transportations" :transportationsTree.add(EnderBackpackItemName, quantity); break;
+            case "Potions" :potionsTree.add(EnderBackpackItemName, quantity); break;
+            case "Records" :recordsTree.add(EnderBackpackItemName, quantity); break;
+            case "Dyes" :dyesTree.add(EnderBackpackItemName, quantity); break;
             default:
                 throw new AssertionError();
         }
     }
     
-    public void add(Item item) {
-        ALLTree.add(item);
-        switch (item.getCategory()) {
-            case "Tools" :toolsTree.add(item); break;
-            case "Food" :foodTree.add(item); break;
-            case "Arrows" :arrrorsTree.add(item); break;
-            case "Decorations" :decorationsTree.add(item); break;
-            case "MobEggs" :mobEggsTree.add(item); break;
-            case "Weapons" :weaponsTree.add(item); break;
-            case "Armor" :armorTree.add(item); break;
-            case "Materials" :materialTree.add(item); break;
-            case "Transportations" :transportationsTree.add(item); break;
-            case "Potions" :potionsTree.add(item); break;
-            case "Records" :recordsTree.add(item); break;
-            case "Dyes" :dyesTree.add(item); break;
-            default:
-                throw new AssertionError();
-        }
-    }
-    
-    public void remove(Item item, int quantity) {
-        String itemName = item.getName();
-        ALLTree.remove(itemName, quantity);
+    public void remove(String EnderBackpackItemName, int quantity) throws SQLException {
+        EnderBackpackItem EnderBackpackItem = database_item4.getEnderBackpackItem(username, EnderBackpackItemName);
+        System.out.println("name: " + EnderBackpackItem.name);
+        System.out.println("type: " + EnderBackpackItem.type);
+        System.out.println("quantity: " + EnderBackpackItem.quantity);
+        ALLTree.remove(EnderBackpackItemName, quantity);
         System.out.println("removed here");
-        switch (item.getCategory()) {
-            case "Tools" :toolsTree.remove(itemName, quantity);  break;
-            case "Food" :foodTree.remove(itemName, quantity); break;
-            case "Arrows" :arrrorsTree.remove(itemName, quantity); break;
-            case "Decorations" :decorationsTree.remove(itemName, quantity); break;
-            case "MobEggs" :mobEggsTree.remove(itemName, quantity); break;
-            case "Weapons" :weaponsTree.remove(itemName, quantity); break;
-            case "Armor" :armorTree.remove(itemName, quantity); break;
-            case "Materials" :materialTree.remove(itemName, quantity); break;
-            case "Transportations" :transportationsTree.remove(itemName, quantity); break;
-            case "Potions" :potionsTree.remove(itemName, quantity); break;
-            case "Records" :recordsTree.remove(itemName, quantity); break;
-            case "Dyes" :dyesTree.remove(itemName, quantity); break;
+        switch (EnderBackpackItem.type) {
+            case "Tools" :toolsTree.remove(EnderBackpackItemName, quantity);  break;
+            case "Food" :foodTree.remove(EnderBackpackItemName, quantity); break;
+            case "Arrows" :arrrorsTree.remove(EnderBackpackItemName, quantity); break;
+            case "Decorations" :decorationsTree.remove(EnderBackpackItemName, quantity); break;
+            case "MobEggs" :mobEggsTree.remove(EnderBackpackItemName, quantity); break;
+            case "Weapons" :weaponsTree.remove(EnderBackpackItemName, quantity); break;
+            case "Armor" :armorTree.remove(EnderBackpackItemName, quantity); break;
+            case "Materials" :materialTree.remove(EnderBackpackItemName, quantity); break;
+            case "Transportations" :transportationsTree.remove(EnderBackpackItemName, quantity); break;
+            case "Potions" :potionsTree.remove(EnderBackpackItemName, quantity); break;
+            case "Records" :recordsTree.remove(EnderBackpackItemName, quantity); break;
+            case "Dyes" :dyesTree.remove(EnderBackpackItemName, quantity); break;
             default:
                 throw new AssertionError();
         }
     }
     
-    public void remove(Item item) {
-        String itemName = item.getName();
-        ALLTree.remove(itemName);
-        switch (item.getCategory()) {
-            case "Tools" :toolsTree.remove(itemName); break;
-            case "Food" :foodTree.remove(itemName); break;
-            case "Arrows" :arrrorsTree.remove(itemName); break;
-            case "Decorations" :decorationsTree.remove(itemName); break;
-            case "MobEggs" :mobEggsTree.remove(itemName); break;
-            case "Weapons" :weaponsTree.remove(itemName); break;
-            case "Armor" :armorTree.remove(itemName); break;
-            case "Materials" :materialTree.remove(itemName); break;
-            case "Transportations" :transportationsTree.remove(itemName); break;
-            case "Potions" :potionsTree.remove(itemName); break;
-            case "Records" :recordsTree.remove(itemName); break;
-            case "Dyes" :dyesTree.remove(itemName); break;
-            default:
-                throw new AssertionError();
-        }
-    }
-    
-    public void removeAll(Item item) {
-        String itemName = item.getName();
-        ALLTree.removeAll(itemName);
-        switch (item.getCategory()) {
-            case "Tools" :toolsTree.removeAll(itemName);  break;
-            case "Food" :foodTree.removeAll(itemName); break;
-            case "Arrows" :arrrorsTree.removeAll(itemName); break;
-            case "Decorations" :decorationsTree.removeAll(itemName); break;
-            case "MobEggs" :mobEggsTree.removeAll(itemName); break;
-            case "Weapons" :weaponsTree.removeAll(itemName); break;
-            case "Armor" :armorTree.removeAll(itemName); break;
-            case "Materials" :materialTree.removeAll(itemName); break;
-            case "Transportations" :transportationsTree.removeAll(itemName); break;
-            case "Potions" :potionsTree.removeAll(itemName); break;
-            case "Records" :recordsTree.removeAll(itemName); break;
-            case "Dyes" :dyesTree.removeAll(itemName); break;
+    public void removeAll(String EnderBackpackItemName) throws SQLException {
+        EnderBackpackItem EnderBackpackItem = database_item4.getEnderBackpackItem(username, EnderBackpackItemName);
+        System.out.println("name: " + EnderBackpackItem.name);
+        System.out.println("type: " + EnderBackpackItem.type);
+        System.out.println("quantity: " + EnderBackpackItem.quantity);        ALLTree.removeAll(EnderBackpackItemName);
+        switch (EnderBackpackItem.getType()) {
+            case "Tools" :toolsTree.removeAll(EnderBackpackItemName);  break;
+            case "Food" :foodTree.removeAll(EnderBackpackItemName); break;
+            case "Arrows" :arrrorsTree.removeAll(EnderBackpackItemName); break;
+            case "Decorations" :decorationsTree.removeAll(EnderBackpackItemName); break;
+            case "MobEggs" :mobEggsTree.removeAll(EnderBackpackItemName); break;
+            case "Weapons" :weaponsTree.removeAll(EnderBackpackItemName); break;
+            case "Armor" :armorTree.removeAll(EnderBackpackItemName); break;
+            case "Materials" :materialTree.removeAll(EnderBackpackItemName); break;
+            case "Transportations" :transportationsTree.removeAll(EnderBackpackItemName); break;
+            case "Potions" :potionsTree.removeAll(EnderBackpackItemName); break;
+            case "Records" :recordsTree.removeAll(EnderBackpackItemName); break;
+            case "Dyes" :dyesTree.removeAll(EnderBackpackItemName); break;
             default:
                 throw new AssertionError();
         }
@@ -144,7 +119,7 @@ public class BSTs<E extends Item>{
         }
     }
     
-    public BinarySearchTree<Item> getParticularCategory(String category) {
+    public BinarySearchTree<EnderBackpackItem> getParticularCategory(String category) {
         switch (category) {
             case "Tools" : return toolsTree;
             case "Food" : return foodTree;
