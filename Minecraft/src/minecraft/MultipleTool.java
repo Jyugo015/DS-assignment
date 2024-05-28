@@ -30,7 +30,7 @@ public class MultipleTool {
         this.head = null;
         this.tail = null;
         this.size = 0;
-        List<Tool> toollist = database_item2.retrieveMultipleTool("defaultUser");
+        List<Tool> toollist = database_item2.retrieveMultipleTool(username);
         toollist.forEach(tool->this.addTool(tool));
     }
 
