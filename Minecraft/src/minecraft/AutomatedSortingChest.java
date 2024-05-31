@@ -26,6 +26,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
@@ -38,6 +39,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -46,10 +48,6 @@ import javafx.stage.Stage;
 public class AutomatedSortingChest extends Application {
     private static BSTs<EnderBackpackItem> bst = new BSTs<>();;
     private final static String imageFilePath = "/minecraft/icon/";
-    
-//    private String[] categories = {"Tools" , "Food", "Arrows", "Decorations", "MobEggs", "Weapons", "Armor", "Materials", "Transportations", "Potions", "Records", "Dyes"};
-    static ArrayList<String> EnderBackpackItemsCollections = new ArrayList<>(Arrays.asList(new String[]{"Axes", "Shovels", "Apple", "Clownfish", "Swords", "Diamond","Potion of Decay", "Potion of Invisibility" , "Bucket" , "Wood" , "Stone" , "Red stone"}));
-    static ArrayList<String> EnderBackpackItemImagesCollections = new ArrayList<>(Arrays.asList(new String[]{"Axes.jpeg", "Shovels.jpg", "Apple.jpg", "Clownfish.jpg", "Swords.jpg", "Diamond.jpg","Potion_of_Decay.jpg","Potion_of_Invisibility.gif","Bucket.jpg","Oak_Wood.jpg","Stone.jpg","Redstone.jpg"}));
     
     private static boolean isSelected = false;
     private static SingleEnderBackpackItemPane selected;
@@ -116,7 +114,6 @@ public class AutomatedSortingChest extends Application {
         });
         
         backgroundImage = new Image(getClass().getResourceAsStream("/minecraft/icon/background.jpeg"));
-//        backgroundImage = new Image(new FileInputStream(new File("C:\\Users\\PC\\Favorites\\Downloads\\Powder Snow Bucket.png")));
         stage = primaryStage;
         stage.setTitle("Automated Sorting Chest");
         stage.setScene(scene1());
@@ -401,24 +398,21 @@ public class AutomatedSortingChest extends Application {
         public SingleEnderBackpackItemPane(String EnderBackpackItem, int quantity, String category) {
             this.category = category;
             this.EnderBackpackItemName = EnderBackpackItem;
-            if (getImage(EnderBackpackItem) != null) {
-                System.out.println(getImage(EnderBackpackItem));
-                EnderBackpackItemImage = new Image(getClass().getResourceAsStream(imageFilePath+ getImage(EnderBackpackItem)));
-            }else {
-                System.out.println("Image " + EnderBackpackItem + " not found");
-            }
+            System.out.println("item: " + EnderBackpackItem);
+            System.out.println(imageFilePath+ EnderBackpackItem +".png");
+            EnderBackpackItemImage = new Image(getClass().getResourceAsStream(imageFilePath+ EnderBackpackItem +".png"));
+            
             quantityOfEnderBackpackItem.setFill(Color.BLACK);
             quantityOfEnderBackpackItem.setFont(Font.font("Verdana", 10));
             quantityOfEnderBackpackItem.setText(quantity + "");
             
-//            EnderBackpackItemName.setFill(Color.BLACK);
-//            EnderBackpackItemName.setFont(Font.font("Verdana", 10));
-//            EnderBackpackItemName.setText(EnderBackpackItem + ": ");
-
             ImageView imageEnderBackpackItem = new ImageView(EnderBackpackItemImage);
             imageEnderBackpackItem.setFitWidth(40);
             imageEnderBackpackItem.setFitHeight(40);
             this.setCenter(imageEnderBackpackItem);
+            
+            Tooltip tooltip = new Tooltip(EnderBackpackItem);
+            Tooltip.install(imageEnderBackpackItem, tooltip);
             
             HBox HBbottom = new HBox();
 //            HBbottom.getChildren().add(EnderBackpackItemName);
@@ -449,24 +443,6 @@ public class AutomatedSortingChest extends Application {
 
         public String getEnderBackpackItemName() {
             return EnderBackpackItemName;
-        }
-        
-        private String getImage(String EnderBackpackItem) {
-            // get index of the EnderBackpackItem
-            System.out.println(EnderBackpackItem);
-            int index = -1;
-            for (int i = 0; i < EnderBackpackItemsCollections.size(); i++) {
-                if (EnderBackpackItemsCollections.get(i).equals(EnderBackpackItem)) {
-                    index = i;
-//                    System.out.println("Searched EnderBackpackItem image " + EnderBackpackItem);
-                    break;
-                }
-//                System.out.println(EnderBackpackItemsCollections[i]);
-            }
-            if (index >= 0 && index < EnderBackpackItemsCollections.size()) {
-                return EnderBackpackItemImagesCollections.get(index);
-            }
-            return null;
         }
     }
     

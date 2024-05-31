@@ -178,9 +178,13 @@ public class BinarySearchTree<E extends EnderBackpackItem> {
     public List<EnderBackpackItem> retrivePossibleEnderBackpackItemsAfterwards(String searchedEnderBackpackItem) {
         Node<EnderBackpackItem> current  = root;
         retriveAllItems();
+        boolean needAdd1 = false;
         while (current != null) {
             int compare = searchedEnderBackpackItem.compareToIgnoreCase(current.EnderBackpackItem.getName());
-//            System.out.println("Compare: " + compare);
+            System.out.println("serched : " + searchedEnderBackpackItem);
+            System.out.println("current: " + current.EnderBackpackItem.getName());
+            System.out.println("current.left: " + current.left);
+            System.out.println("current.right: " + current.right);
             if (compare == 0) {
                 break;
             } else if (compare < 0 ) {
@@ -190,13 +194,14 @@ public class BinarySearchTree<E extends EnderBackpackItem> {
                     break;
                 } 
             } else {
-                if (current.left == null && current.right == null) {
-                    current = current.parent;
-                    break;
-                }
-                if (current.right != null && current.right.EnderBackpackItem.getName().compareToIgnoreCase(searchedEnderBackpackItem)<0) {
-                    current = current.parent;
-                    break;
+                if (current.right == null){
+                    if (current.parent!=null && current.parent.EnderBackpackItem.getName().compareToIgnoreCase(current.EnderBackpackItem.name) > 0) {
+                        current = current.parent;
+                        break;
+                    } else {
+                        needAdd1 = true;
+                        break;
+                    }
                 } else {
                     current = current.right;
                 }
@@ -216,7 +221,7 @@ public class BinarySearchTree<E extends EnderBackpackItem> {
                 break;
             }
         }
-        return retrivingList.subList(index, size);
+        return retrivingList.subList((needAdd1 && index + 1 < size)? index +1 : index, size);
     }
     
     public ArrayList<EnderBackpackItem> retriveAllItems() {

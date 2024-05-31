@@ -149,6 +149,7 @@ public class database_item4 {
         int quantity;
         if (result.next()){
             quantity = result.getInt("Quantity") - quantitytoreduce;
+            database_itemBox.addItem(username, itemName, retrieveType(itemName), retrieveFunction(itemName), quantitytoreduce);
             if (quantity<=0){
                 statement = "DELETE FROM automatedSortingChest WHERE username = ? AND Name = ? ";
                 PreparedStatement delete = connection.prepareStatement(statement);
@@ -164,7 +165,6 @@ public class database_item4 {
                 update.setString(3, itemName);
                 update.executeUpdate();
             }
-            database_itemBox.addItem(username, itemName, retrieveType(itemName), retrieveFunction(itemName), quantitytoreduce);
         }
         else
             System.out.println("The automated sorting chest does not containg this particular item");

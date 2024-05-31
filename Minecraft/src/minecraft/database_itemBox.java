@@ -19,7 +19,7 @@ public class database_itemBox {
         addItem("defaultUser", "Diamond", "Materials","raw materials to boost your items",10);
         addItem("defaultUser", "Potion of Decay", "Potions","decay something",10);
         addItem("defaultUser", "Potion of Invisibility", "Potions","makes you invisible",10);
-        addItem("defaultUser", "Bucket", "Tools","store water",10);
+        addItem("defaultUser", "Bucket of Water", "Tools","store water",10);
         removeItem("defaultUser", "defaultUser", 1);
         //call when a new user is registered
     }
