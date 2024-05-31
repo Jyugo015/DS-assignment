@@ -8,11 +8,27 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class database_itemBox {
+    //item in user's box
+    public static void main(String[] args) throws SQLException{
+        
+        addItem("defaultUser", "Axes", "Tools", "obtain more block types as items",10);
+        addItem("defaultUser", "Shovels", "Tools"," to break the dirt, sand, gravel and other soil blocks",10);
+        addItem("defaultUser", "Apple", "Food","just eat",10);
+        addItem("defaultUser", "Clownfish", "Food", "source of protein",10);
+        addItem("defaultUser", "Swords", "Weapons","defence ourself",10);
+        addItem("defaultUser", "Diamond", "Materials","raw materials to boost your items",10);
+        addItem("defaultUser", "Potion of Decay", "Potions","decay something",10);
+        addItem("defaultUser", "Potion of Invisibility", "Potions","makes you invisible",10);
+        addItem("defaultUser", "Bucket of Water", "Tools","store water",10);
+        removeItem("defaultUser", "defaultUser", 1);
+        //call when a new user is registered
+    }
+
     public static Connection getConnection() throws SQLException{
         String driver = "com.mysql.cj.jdbc.Driver";
         String url = "jdbc:mysql://localhost:3306/minecraft";
         String username = "root";
-        String password = "dbqLb1234!";
+        String password = "harimau";
         try {
             Class.forName(driver);
         } catch (ClassNotFoundException e) {
@@ -23,7 +39,7 @@ public class database_itemBox {
     }
 
     public static ArrayList<String> retrieveItem(String user) throws SQLException{
-        ArrayList<String> record = new ArrayList<String>();
+        ArrayList<String> record = new ArrayList<>();
         Connection connection = getConnection();
         String statement = "SELECT * FROM itemBox WHERE Username = ?";
         PreparedStatement retrieve  = connection.prepareStatement(statement);
@@ -79,7 +95,8 @@ public class database_itemBox {
         check.setString(2,itemname);
         ResultSet result = check.executeQuery();
         int Itemquantity;
-        if (result.next()){
+        if (result.next() && quantitytoadd>0){
+            System.out.println("quantity initially: " + result.getInt("Quantity") );
             Itemquantity = result.getInt("Quantity") + quantitytoadd;
             statement = "UPDATE itemBox SET Quantity = ? WHERE Username = ? AND Name =?";
             PreparedStatement update = connection.prepareStatement(statement);
@@ -88,7 +105,7 @@ public class database_itemBox {
             update.setString(3, itemname);
             update.executeUpdate();
         }
-        else{
+        else if (quantitytoadd>0){
             Itemquantity = quantitytoadd;
             statement = "INSERT INTO itemBox(username, name, type, functions, quantity) VALUES (?,?,?,?,?)";
             PreparedStatement insert = connection.prepareStatement(statement);
@@ -98,6 +115,7 @@ public class database_itemBox {
             insert.setString(4, function);
             insert.setInt(5,quantitytoadd);
             insert.executeUpdate();
+            System.out.println("Inserted " + retrieveQuantity(itemname, username));
         }
     }    
     
@@ -111,7 +129,7 @@ public class database_itemBox {
         int quantity;
         if (result.next()){
             quantity = result.getInt("Quantity") - quantitytoreduce;
-            if (quantity==0){
+            if (quantity<=0){
                 statement = "DELETE FROM itemBox WHERE Username = ? AND Name = ? ";
                 PreparedStatement delete = connection.prepareStatement(statement);
                 delete.setString(1, username);
@@ -128,4 +146,9 @@ public class database_itemBox {
             }
         }
     }
+    
+    public static EnderBackpackItem getEnderBackpackItem(String username, String itemName) throws SQLException {
+        return new EnderBackpackItem(itemName, retrieveType(itemName), retrieveFunction(itemName), retrieveQuantity(itemName, username));
+    }
+    
 }

@@ -1,9 +1,15 @@
 package minecraft;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.beans.value.ChangeListener;
@@ -20,6 +26,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
@@ -32,41 +39,81 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import minecraft.BSTs;
-import minecraft.Item;
 
 
 public class AutomatedSortingChest extends Application {
-    private static BSTs<Item> bst = new BSTs<>();
-//    private String[] categories = {"Tools" , "Food", "Arrows", "Decorations", "MobEggs", "Weapons", "Armor", "Materials", "Transportations", "Potions", "Records", "Dyes"};
-    static String[] itemsCollections = {"Axes", "Shovels", "Apple", "Clownfish", "Swords", "Diamond","Potion of Decay", "Potion of Invisibility" , "Bucket" , "Wood" , "Stone" , "Red stone"};
-    static String[] ItemImagesCollections = {"Axes.jpeg", "Shovels.jpg", "Apple.jpg", "Clownfish.jpg", "Swords.jpg", "Diamond.jpg","Potion_of_Decay.jpg","Potion_of_Invisibility.gif","Bucket.jpg","Oak_Wood.jpg","Stone.jpg","Redstone.jpg"};
+    private static BSTs<EnderBackpackItem> bst = new BSTs<>();;
+    private final static String imageFilePath = "/minecraft/icon/";
     
     private static boolean isSelected = false;
-    private static SingleItemPane selected;
+    private static SingleEnderBackpackItemPane selected;
     private static String categoryChosen = "(Include ALL)";
-    private static List<Item> allItems = bst.getParticularCategory(categoryChosen).retriveAllItems();
+    private static List<EnderBackpackItem> allSortedItems;
     private static Image backgroundImage;
     private static Stage stage = new Stage();
      
     private static Text reminder = new Text();
-    private static Text totalNoOfItemInChest = new Text();
-    private static Text totalNoOfItemOfCategory = new Text();
-    private static TextField searchItemTextField = new TextField(categoryChosen);
+    private static Button backToMainPageButton = new Button("Back to main page");
+    private static Text totalNoOfEnderBackpackItemInChest = new Text();
+    private static Text totalNoOfEnderBackpackItemOfCategory = new Text();
+    private static TextField searchEnderBackpackItemTextField = new TextField(categoryChosen);
     private static TextField quantityToAddOrRemove = new TextField();
     private static BorderPane pane1 = new BorderPane();
     
     
-    private static ArrayList<String> unsortedItemNameArrayList = new ArrayList<>();
-    private static ArrayList<Integer> unsortedItemQuantityArrayList = new ArrayList<>();
-    private static ArrayList<String> unsortedItemCategoryArrayList = new ArrayList<>();
-        
+    private static ArrayList<String> unsortedEnderBackpackItemNameArrayList = new ArrayList<>();
+    private static ArrayList<Integer> unsortedEnderBackpackItemQuantityArrayList = new ArrayList<>();
+    private static ItemBox unsortedBox;
+    private static String username;
+    
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws SQLException, FileNotFoundException {
+        username = "defaultUser";
+        unsortedBox = new ItemBox(username);
+        unsortedEnderBackpackItemNameArrayList.clear();
+        unsortedEnderBackpackItemQuantityArrayList.clear();
+        try {
+            unsortedBox = new ItemBox(username);
+            // loading unsorted item in itemBox
+            for (EnderBackpackItem item: unsortedBox.list) {
+                System.out.println("Adding item " + item.name + " with " + database_itemBox.retrieveQuantity(item.name , username) + " type " + item.type);
+                unsortedEnderBackpackItemNameArrayList.add(item.name);
+                unsortedEnderBackpackItemQuantityArrayList.add(database_itemBox.retrieveQuantity(item.name , username));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(AutomatedSortingChest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+//        unsortedItemList = FXCollections.observableArrayList(unsortedBox.list);
         
+        
+//        for (int i = 0; i < unsortedBox.size(); i++) {
+//            EnderBackpackItem item = unsortedBox.get(i);
+//            bst.add(item, item.quantity);
+//        }
+
+        
+        // sorted item in Automated sorting chest
+        for (String itemName : database_item4.retrieveItem(username)) {
+            EnderBackpackItem item = database_item4.getEnderBackpackItem(username, itemName);
+            bst.add(itemName, item.quantity);
+        }
+        allSortedItems= bst.getParticularCategory(categoryChosen).retriveAllItems();
+        
+        backToMainPageButton.setOnAction(e->{
+            try {
+                MainPage mainPage = new MainPage();
+                mainPage.start((Stage) ((Button) e.getSource()).getScene().getWindow());
+//                stage.close();
+            } catch (IOException ex) {
+                Logger.getLogger(AutomatedSortingChest.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        });
+        
+        backgroundImage = new Image(getClass().getResourceAsStream("/minecraft/icon/background.jpeg"));
         stage = primaryStage;
         stage.setTitle("Automated Sorting Chest");
         stage.setScene(scene1());
@@ -84,9 +131,9 @@ public class AutomatedSortingChest extends Application {
         categoriesChoiceBox.setValue("(Include ALL)");
         categoriesChoiceBox.getItems().addAll("Tools", "Food", "Arrows", "Decorations", "MobEggs", "Weapons", "Armor", "Materials", "Transportations", "Potions", "Records", "Dyes", "(Include ALL)");        
         
-        Button addNewItemButton = new Button("Add New Item");
-        Button addcurrentItemButton = new Button("Add");
-        Button removeCurrentItemButton = new Button("Remove");
+        Button addNewEnderBackpackItemButton = new Button("Add New EnderBackpackItem");
+        Button addcurrentEnderBackpackItemButton = new Button("Add");
+        Button removeCurrentEnderBackpackItemButton = new Button("Remove");
         
         // Background
         BackgroundSize bSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
@@ -98,69 +145,82 @@ public class AutomatedSortingChest extends Application {
         
         // Top pane
         VBox topPane = new VBox(); 
-        topPane.getChildren().add(totalNoOfItemInChest);
-        topPane.getChildren().add(categoriesLabel);
-        topPane.getChildren().add(categoriesChoiceBox);
-        topPane.getChildren().add(searchItemTextField);
-        topPane.getChildren().add(totalNoOfItemOfCategory);
+        topPane.getChildren().addAll(totalNoOfEnderBackpackItemInChest, categoriesLabel,categoriesChoiceBox,searchEnderBackpackItemTextField,totalNoOfEnderBackpackItemOfCategory);
         
         // Bottom pane
         HBox bottomPane = new HBox();
         Text quantityText = new Text("Quantity: ");
-        bottomPane.getChildren().add(quantityText);
-        bottomPane.getChildren().add(quantityToAddOrRemove);
-        bottomPane.getChildren().add(addcurrentItemButton);
-        bottomPane.getChildren().add(removeCurrentItemButton);
-        bottomPane.getChildren().add(reminder);
+        bottomPane.getChildren().addAll(quantityText,quantityToAddOrRemove,addcurrentEnderBackpackItemButton,removeCurrentEnderBackpackItemButton,backToMainPageButton,reminder);
         
         // Right pane
-        pane1.setRight(addNewItemButton);
+        pane1.setRight(addNewEnderBackpackItemButton);
         
         // Main pane
-        pane1.setCenter(new ItemsGridPane(categoryChosen));
+        pane1.setCenter(new EnderBackpackItemsGridPane(categoryChosen));
         pane1.setTop(topPane);
         pane1.setBottom(bottomPane);
 
         // Set on action
         // Select a new category
-        categoriesChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>(){
-            @Override
-            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-                categoryChosen = categoriesChoiceBox.getItems().get((Integer)newValue);
-                System.out.println(categoryChosen);
-                searchItemTextField.setText(categoryChosen);
-            }
+        categoriesChoiceBox.getSelectionModel().selectedIndexProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+            categoryChosen = categoriesChoiceBox.getItems().get((Integer)newValue);
+            System.out.println(categoryChosen);
+            searchEnderBackpackItemTextField.setText(categoryChosen);
         });
         
-        // search item to display the possible item
-        searchItemTextField.textProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
-            pane1.setCenter(new ItemsGridPane(newValue));
+        // search EnderBackpackItem to display the possible EnderBackpackItem
+        searchEnderBackpackItemTextField.textProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+            pane1.setCenter(new EnderBackpackItemsGridPane(newValue));
         });
         
-        addcurrentItemButton.setOnAction(e -> {
-            if (isSelected && quantityToAddOrRemove.getText() != null && ! quantityToAddOrRemove.getText().equals("")) {
-                bst.add(new Item(selected.getItemName(), selected.getCategory()), Integer.valueOf(quantityToAddOrRemove.getText()));
+        addcurrentEnderBackpackItemButton.setOnAction(e -> {
+            if (isSelected && quantityToAddOrRemove.getText() != null && ! quantityToAddOrRemove.getText().equals("") && Integer.parseInt(quantityToAddOrRemove.getText()) != 0) {
+                try {
+                    String itemName = selected.getEnderBackpackItemName();
+                    int quantity = Integer.parseInt(quantityToAddOrRemove.getText());
+                    int quantityInDatabaseItembox = database_itemBox.retrieveQuantity(itemName, username);
+                    System.out.println("Qauntity to add: " + quantity + ", quanitty in database: " + quantityInDatabaseItembox);
+                    quantity = quantityInDatabaseItembox>=quantity ? quantity : quantityInDatabaseItembox;
+                    bst.add(itemName, quantity);
+                    database_item4.addItem(username, itemName, quantity);
+                    reminder.setText("You have inserted " + (quantityInDatabaseItembox>=quantity ? quantity : quantityInDatabaseItembox) + " " + selected);
+                } catch (SQLException ex) {
+                    Logger.getLogger(AutomatedSortingChest.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                unsortedBox.clearItem(); // clear database itembox
                 updateAll();
             } else if (! isSelected) {
-                reminder.setText("Please select a item to add.");
+                reminder.setText("Please select a EnderBackpackItem to add.");
             } else {
                 reminder.setText("Please enter the amount to add.");
             }
         });
         
-        // Remove amount of current item
-        removeCurrentItemButton.setOnAction(e -> {
-            if (isSelected && quantityToAddOrRemove.getText() != null && ! quantityToAddOrRemove.getText().equals("")) {
-                bst.remove(new Item(selected.getItemName(), selected.getCategory()), Integer.valueOf(quantityToAddOrRemove.getText()));
+        // Remove amount of current EnderBackpackItem
+        removeCurrentEnderBackpackItemButton.setOnAction(e -> {
+            if (isSelected && quantityToAddOrRemove.getText() != null && ! quantityToAddOrRemove.getText().equals("") && Integer.parseInt(quantityToAddOrRemove.getText()) != 0) {
+                try {
+                    String itemName = selected.getEnderBackpackItemName();
+                    int quantity = Integer.parseInt(quantityToAddOrRemove.getText());
+                    int quantityInDatabaseSortingChest = database_item4.retrieveQuantity(itemName, username);
+                    System.out.println("Quantity to remove: " + quantity + ", quantity in sortingChest: " + quantityInDatabaseSortingChest);
+                    quantity = quantityInDatabaseSortingChest>=quantity ? quantity : quantityInDatabaseSortingChest;
+                    System.out.println("Quantity final: " + quantity);
+                    bst.remove(itemName, quantity);
+                    database_item4.removeItem(itemName, username, quantity);
+                    reminder.setText("You have removed " + quantity + " " + selected);
+                } catch (SQLException ex) {
+                    Logger.getLogger(AutomatedSortingChest.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 updateAll();
             } else if (! isSelected) {
-                reminder.setText("Please select a item to remove.");
+                reminder.setText("Please select a EnderBackpackItem to remove.");
             } else {
                 reminder.setText("Please enter the amount to remove.");
             }
         });
         
-        // enter the amount of item to add or remove
+        // enter the amount of EnderBackpackItem to add or remove
         quantityToAddOrRemove.textProperty().addListener(new ChangeListener<String>(){
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
@@ -176,25 +236,42 @@ public class AutomatedSortingChest extends Application {
         });
         
         // swtich scene
-        addNewItemButton.setOnAction(e->{stage.setScene(scene2());});
+        addNewEnderBackpackItemButton.setOnAction(e->{stage.setScene(scene2());});
+        
         return new Scene(pane1, 700, 450);
     }
     
-    // Scene2: Add new item
+    // Scene2: Add new EnderBackpackItem
     private Scene scene2 () {
-        pane1 = new BorderPane();
-        Text unsortedItemText = new Text("Name of new item to add: ");
-        
-        ObservableList<String> itemsObservableValue = FXCollections.observableArrayList();
-        System.out.println("Size of list view: " + itemsObservableValue.size());
-        for (int i = 0; i < unsortedItemNameArrayList.size(); i++) {
-            itemsObservableValue.add(unsortedItemNameArrayList.get(i) + " (" + unsortedItemQuantityArrayList.get(i) + ")");
+        unsortedEnderBackpackItemNameArrayList.clear();
+        unsortedEnderBackpackItemQuantityArrayList.clear();
+        try {
+            unsortedBox = new ItemBox(username);
+            // loading unsorted item in itemBox
+            for (EnderBackpackItem item: unsortedBox.list) {
+                System.out.println("Adding item " + item.name + " with " + database_itemBox.retrieveQuantity(item.name , username) + " type " + item.type);
+                unsortedEnderBackpackItemNameArrayList.add(item.name);
+                unsortedEnderBackpackItemQuantityArrayList.add(database_itemBox.retrieveQuantity(item.name , username));
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(AutomatedSortingChest.class.getName()).log(Level.SEVERE, null, ex);
         }
-        ListView<String> itemsListView = new ListView<>();
-        itemsListView.getItems().addAll(itemsObservableValue);
-        itemsListView.setPrefWidth(150);
-        itemsListView.setPrefHeight(200);
-        itemsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        
+        pane1 = new BorderPane();
+        Text unsortedEnderBackpackItemText = new Text("Name of new EnderBackpackItem to add: ");
+        ObservableList<String> EnderBackpackItemsObservableValue = FXCollections.observableArrayList();
+        EnderBackpackItemsObservableValue.clear();
+        System.out.println("Size of list view: " + EnderBackpackItemsObservableValue.size());
+        for (int i = 0; i < unsortedEnderBackpackItemNameArrayList.size(); i++) {
+            EnderBackpackItemsObservableValue.add(unsortedEnderBackpackItemNameArrayList.get(i) + " (" + unsortedEnderBackpackItemQuantityArrayList.get(i) + ")");
+        }
+        System.out.println("Size of list view after: " + EnderBackpackItemsObservableValue.size());
+        ListView<String> EnderBackpackItemsListView = new ListView<>();
+        
+        EnderBackpackItemsListView.getItems().addAll(EnderBackpackItemsObservableValue);
+        EnderBackpackItemsListView.setPrefWidth(150);
+        EnderBackpackItemsListView.setPrefHeight(200);
+        EnderBackpackItemsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         
         Button addButton = new Button("Add");
         Button addAllButton = new Button("Add ALL");
@@ -209,56 +286,71 @@ public class AutomatedSortingChest extends Application {
         pane1.setBackground(background);
         
         // Bottom pane
-        HBox bottomPane = new HBox(addButton, addAllButton, backButton);
+        HBox bottomPane = new HBox(addButton, addAllButton, backButton,backToMainPageButton);
         bottomPane.setPadding(new Insets(20,20,20,20));
         
         // Center pane
         ScrollPane centerPane = new ScrollPane();
-        centerPane.setContent(itemsListView);
+        centerPane.setContent(EnderBackpackItemsListView);
         centerPane.setStyle("-fx-background-color: transparent");
         
         // Main pane
-        pane1.setLeft(unsortedItemText);
+        pane1.setLeft(unsortedEnderBackpackItemText);
         pane1.setBottom(bottomPane);
         pane1.setCenter(centerPane);
 
         // Set on action
-        // Add item(s)
-        addButton.disableProperty().bind(itemsListView.getSelectionModel().selectedItemProperty().isNull());
+        // Add EnderBackpackItem(s)
+        addButton.disableProperty().bind(EnderBackpackItemsListView.getSelectionModel().selectedItemProperty().isNull());
         addButton.setOnAction(e -> {
-            ArrayList<String> itemsToBeRemoved = new ArrayList<>(itemsListView.getSelectionModel().getSelectedItems());
-            System.out.println("Size" + itemsToBeRemoved.size());
-            System.out.println("Items " + itemsToBeRemoved.toString());
-            for (int i = 0; i < itemsToBeRemoved.size();) {
-                String string = itemsToBeRemoved.get(0);
+            ArrayList<String> EnderBackpackItemsToBeRemoved = new ArrayList<>(EnderBackpackItemsListView.getSelectionModel().getSelectedItems());
+            System.out.println("Size" + EnderBackpackItemsToBeRemoved.size());
+            System.out.println("EnderBackpackItems " + EnderBackpackItemsToBeRemoved.toString());
+            for (int i = 0; i < EnderBackpackItemsToBeRemoved.size();) {
+                String string = EnderBackpackItemsToBeRemoved.get(0);
                 System.out.println("String: " +string);
-                String itemName = string.split("[(]")[0].trim();
-                System.out.println("Item name splited = " + itemName);
-               bst.add(new Item(itemName, unsortedItemCategoryArrayList.get(getIndexInUnsorted(itemName))), unsortedItemQuantityArrayList.get(getIndexInUnsorted(itemName)));
-                System.out.println("Removed " + itemsToBeRemoved.remove(string));
-               itemsListView.getItems().remove(string);
-               int index = getIndexInUnsorted(itemName);
-               unsortedItemNameArrayList.remove(index);
-               unsortedItemCategoryArrayList.remove(index);
-               unsortedItemQuantityArrayList.remove(index);
+                String EnderBackpackItemName = string.split("[(]")[0].trim();
+                System.out.println("EnderBackpackItem name splited = " + EnderBackpackItemName);
+                try {
+                    System.out.println(database_itemBox.retrieveQuantity(EnderBackpackItemName, username));
+                    int quantity = database_itemBox.retrieveQuantity(EnderBackpackItemName, username);
+                    bst.add(EnderBackpackItemName, quantity);
+                    database_item4.addItem(username, EnderBackpackItemName, quantity);
+                } catch (SQLException ex) {
+                    Logger.getLogger(AutomatedSortingChest.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                System.out.println("Removed " + EnderBackpackItemsToBeRemoved.remove(string));
+                EnderBackpackItemsListView.getItems().remove(string);
+                int index = getIndexInUnsorted(EnderBackpackItemName);
+                unsortedEnderBackpackItemNameArrayList.remove(index);
+                unsortedEnderBackpackItemQuantityArrayList.remove(index);
                 System.out.println("i" + i);
-                System.out.println("Size after remove: " + itemsToBeRemoved.size());
-                System.out.println("i<size: " + (i<itemsToBeRemoved.size()));
+                System.out.println("Size after remove: " + EnderBackpackItemsToBeRemoved.size());
+                System.out.println("i<size: " + (i<EnderBackpackItemsToBeRemoved.size()));
             }
-            centerPane.setContent(itemsListView);
+            centerPane.setContent(EnderBackpackItemsListView);
             pane1.setCenter(centerPane);
         });
         
-        // Add all items
+        // Add all EnderBackpackItems
         addAllButton.setOnAction(e -> {
-            for (int i = 0; i < unsortedItemNameArrayList.size(); i++) {
-               bst.add(new Item(unsortedItemNameArrayList.get(i), unsortedItemCategoryArrayList.get(i)), unsortedItemQuantityArrayList.get(i));
+            for (int i = 0; i < unsortedEnderBackpackItemNameArrayList.size(); i++) {
+                String itemName = unsortedEnderBackpackItemNameArrayList.get(i);
+                System.out.println("name: "+ itemName);
+                try {
+                    int quantity = database_itemBox.retrieveQuantity(itemName, username);
+                    bst.add(itemName, quantity);
+                    database_item4.addItem(username, itemName, quantity);
+                } catch (SQLException ex) {
+                    Logger.getLogger(AutomatedSortingChest.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
-            unsortedItemCategoryArrayList.clear();
-            unsortedItemNameArrayList.clear();
-            unsortedItemQuantityArrayList.clear();
-            itemsListView.getItems().clear();
-            pane1.setCenter(itemsListView);
+            
+            unsortedBox.clearItem(); // clear database itembox
+            unsortedEnderBackpackItemNameArrayList.clear();
+            unsortedEnderBackpackItemQuantityArrayList.clear();
+            EnderBackpackItemsListView.getItems().clear();
+            pane1.setCenter(EnderBackpackItemsListView);
         });
         
         // Back to previous scene
@@ -267,10 +359,10 @@ public class AutomatedSortingChest extends Application {
         return new Scene(pane1, 700, 400);
     }
     
-    public int getIndexInUnsorted(String itemName) {
-        for (int i = 0; i < unsortedItemNameArrayList.size(); i++) {
-            System.out.println(unsortedItemNameArrayList.get(i));
-            if (unsortedItemNameArrayList.get(i).equals(itemName)) {
+    public int getIndexInUnsorted(String EnderBackpackItemName) {
+        for (int i = 0; i < unsortedEnderBackpackItemNameArrayList.size(); i++) {
+            System.out.println(unsortedEnderBackpackItemNameArrayList.get(i));
+            if (unsortedEnderBackpackItemNameArrayList.get(i).equals(EnderBackpackItemName)) {
                 return i;
             }
         }
@@ -279,9 +371,9 @@ public class AutomatedSortingChest extends Application {
     
     public void updateAll() {
         reminder.setText("");
-        totalNoOfItemInChest.setText("Total number of item in the automated sorting chest is: " + bst.getTotalQuantity());
-        totalNoOfItemOfCategory.setText("Total number of item for the category is: " + bst.getQuantityOfCateogory(categoryChosen));
-        pane1.setCenter(new ItemsGridPane(categoryChosen));
+        totalNoOfEnderBackpackItemInChest.setText("Total number of EnderBackpackItem in the automated sorting chest is: " + bst.getTotalQuantity());
+        totalNoOfEnderBackpackItemOfCategory.setText("Total number of EnderBackpackItem for the category is: " + bst.getQuantityOfCateogory(categoryChosen));
+        pane1.setCenter(new EnderBackpackItemsGridPane(categoryChosen));
         quantityToAddOrRemove.clear();
         if (selected != null) {
             selected.setStyle("-fx-border-color: rgba(0,0,0,0)"); 
@@ -292,77 +384,39 @@ public class AutomatedSortingChest extends Application {
     }
     
     public static void main(String[] args) throws FileNotFoundException {
-        backgroundImage = new Image(new FileInputStream("background.jpeg"));
-        Item[] items = new Item[9];
-        items[0] = new Item("Axes", "Tools");
-        items[1] = new Item("Shovels", "Tools");
-        items[2] = new Item("Apple", "Food");
-        items[3] = new Item("Clownfish", "Food");
-        items[4] = new Item("Swords", "Weapons");
-        items[5] = new Item("Diamond", "Materials");
-        items[6] = new Item("Potion of Decay", "Potions");
-        items[7] = new Item("Potion of Invisibility", "Potions");
-        items[8] = new Item("Bucket", "Tools");
-        
-        
-        for (int i = 0; i < items.length; i++) {
-            bst.add(items[i]);
-        }
-        bst.add(items[0],100);
-        
-        unsortedItemNameArrayList.add("Axes");
-        unsortedItemNameArrayList.add("Wood");
-        unsortedItemNameArrayList.add("Stone");
-        unsortedItemNameArrayList.add("Red stone");
-        unsortedItemQuantityArrayList.add(10);
-        unsortedItemQuantityArrayList.add(20);
-        unsortedItemQuantityArrayList.add(30);
-        unsortedItemQuantityArrayList.add(40);
-        unsortedItemCategoryArrayList.add("Tools");
-        unsortedItemCategoryArrayList.add("Materials");
-        unsortedItemCategoryArrayList.add("Materials");
-        unsortedItemCategoryArrayList.add("Materials");
-        
         launch(args);
     }
     
-    private class SingleItemPane extends BorderPane{
-        private Image itemImage = backgroundImage;
-        private Text quantityOfItem = new Text("0");
+    private class SingleEnderBackpackItemPane extends BorderPane{
+        private Image EnderBackpackItemImage = backgroundImage;
+        private Text quantityOfEnderBackpackItem = new Text("0");
         private String category;
-        private String ItemName;
+        private String EnderBackpackItemName;
         
-//        private Text itemName = new Text();
+//        private Text EnderBackpackItemName = new Text();
 
-        public SingleItemPane(String item, int quantity, String category) {
+        public SingleEnderBackpackItemPane(String EnderBackpackItem, int quantity, String category) {
             this.category = category;
-            this.ItemName = item;
-            if (getImage(item) != null) {
-                System.out.println(getImage(item));
-                try {
-                    itemImage = new Image(new FileInputStream(getImage(item)));
-                } catch (FileNotFoundException ex) {
-                    System.out.println("File doesn't exist.");
-                }
-            }else {
-                System.out.println("Image " + item + " not found");
-            }
-            quantityOfItem.setFill(Color.BLACK);
-            quantityOfItem.setFont(Font.font("Verdana", 10));
-            quantityOfItem.setText(quantity + "");
+            this.EnderBackpackItemName = EnderBackpackItem;
+            System.out.println("item: " + EnderBackpackItem);
+            System.out.println(imageFilePath+ EnderBackpackItem +".png");
+            EnderBackpackItemImage = new Image(getClass().getResourceAsStream(imageFilePath+ EnderBackpackItem +".png"));
             
-//            itemName.setFill(Color.BLACK);
-//            itemName.setFont(Font.font("Verdana", 10));
-//            itemName.setText(item + ": ");
-
-            ImageView imageItem = new ImageView(itemImage);
-            imageItem.setFitWidth(40);
-            imageItem.setFitHeight(40);
-            this.setCenter(imageItem);
+            quantityOfEnderBackpackItem.setFill(Color.BLACK);
+            quantityOfEnderBackpackItem.setFont(Font.font("Verdana", 10));
+            quantityOfEnderBackpackItem.setText(quantity + "");
+            
+            ImageView imageEnderBackpackItem = new ImageView(EnderBackpackItemImage);
+            imageEnderBackpackItem.setFitWidth(40);
+            imageEnderBackpackItem.setFitHeight(40);
+            this.setCenter(imageEnderBackpackItem);
+            
+            Tooltip tooltip = new Tooltip(EnderBackpackItem);
+            Tooltip.install(imageEnderBackpackItem, tooltip);
             
             HBox HBbottom = new HBox();
-//            HBbottom.getChildren().add(itemName);
-            HBbottom.getChildren().add(quantityOfItem);
+//            HBbottom.getChildren().add(EnderBackpackItemName);
+            HBbottom.getChildren().add(quantityOfEnderBackpackItem);
             HBbottom.setAlignment(Pos.BOTTOM_RIGHT);
             this.setBottom(HBbottom);
             this.setPrefWidth(40);
@@ -387,47 +441,31 @@ public class AutomatedSortingChest extends Application {
             return category;
         }
 
-        public String getItemName() {
-            return ItemName;
-        }
-        
-        private String getImage(String item) {
-            // get index of the item
-            System.out.println(item);
-            int index = -1;
-            for (int i = 0; i < itemsCollections.length; i++) {
-                if (itemsCollections[i].equals(item)) {
-                    index = i;
-//                    System.out.println("Searched item image " + item);
-                    break;
-                }
-//                System.out.println(itemsCollections[i]);
-            }
-            if (index >= 0 && index < itemsCollections.length) {
-                return ItemImagesCollections[index];
-            }
-            return null;
+        public String getEnderBackpackItemName() {
+            return EnderBackpackItemName;
         }
     }
     
-    private class ItemsGridPane extends GridPane{
+    private class EnderBackpackItemsGridPane extends GridPane{
         
-        public ItemsGridPane(String input) {
-            allItems = input.equals(categoryChosen) ? bst.getParticularCategory(input).retriveAllItems() : bst.getParticularCategory(categoryChosen).retrivePossibleItemsAfterwards(input);
+        public EnderBackpackItemsGridPane(String input) {
+            allSortedItems = input.equals(categoryChosen) ? bst.getParticularCategory(input).retriveAllItems() : bst.getParticularCategory(categoryChosen).retrivePossibleEnderBackpackItemsAfterwards(input);
             System.out.println("Category chosen: " + categoryChosen);
-            getChildren().clear();
+            this.getChildren().clear();
+            System.out.println("The panes in the center: " + this.getChildren().size());
+//            System.out.println("allSortedItems size: " + allSortedItems.size());
             int noOfColumn = 0;
-            if (allItems != null) {
+            if (allSortedItems != null) {
                 int j = 0;
-                for (int i = 0; i < allItems.size(); i++, noOfColumn++) {
-                    String itemName  = allItems.get(i).getName();
-                    SingleItemPane pane = new SingleItemPane(itemName, bst.getParticularCategory(categoryChosen).getQuantity(itemName), allItems.get(i).getCategory());
+                for (int i = 0; i < allSortedItems.size(); i++, noOfColumn++) {
+                    String EnderBackpackItemName  = allSortedItems.get(i).getName();
+                    SingleEnderBackpackItemPane pane = new SingleEnderBackpackItemPane(EnderBackpackItemName, bst.getParticularCategory(categoryChosen).getQuantity(EnderBackpackItemName), allSortedItems.get(i).getType());
                     add(pane, noOfColumn,j);
                     if ((i+1)%10 == 0) {
                         j++;
                         noOfColumn = -1;
                     }
-                        
+                    System.out.println("i: " + i);
                 }
             } 
             setHgap(2);

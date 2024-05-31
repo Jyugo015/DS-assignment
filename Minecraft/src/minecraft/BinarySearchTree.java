@@ -1,17 +1,19 @@
 package minecraft;
 
+import java.sql.SQLException;
 import java.util.ArrayList; 
 import java.util.List;
 
-public class BinarySearchTree<E extends Item> {
-    private Node<Item> root;
+public class BinarySearchTree<E extends EnderBackpackItem> {
+    private Node<EnderBackpackItem> root;
     private int size = 0;
     private int quantity = 0;
-    private ArrayList<Item> retrivingList = new ArrayList<>();
+    private String username;
+    private ArrayList<EnderBackpackItem> retrivingList = new ArrayList<>();
 
-//    public Node<Item> getRoot() {
-//        return root;
-//    }
+    public BinarySearchTree(String username) {
+        this.username = username;
+    }
 
     public int getSize() {
         return size;
@@ -21,64 +23,64 @@ public class BinarySearchTree<E extends Item> {
         return quantity;
     }
     
-    public void add(Item item) {
-        add(item, 1);
-    }
-    
-    public void add(Item item, int quantity) {
+    public void add(String EnderBackpackItemName, int quantity) throws SQLException {
+        EnderBackpackItem EnderBackpackItem = database_itemBox.getEnderBackpackItem(username,EnderBackpackItemName);
+//        if (EnderBackpackItem.type == null) { // the item is not inside the itemBox
+//            System.out.println("Type is null");
+//            EnderBackpackItem = database_item4.getEnderBackpackItem(username, EnderBackpackItemName);
+//        }
+        System.out.println("quantity in binary tree search add: " + quantity + " of " + EnderBackpackItemName + " type " + EnderBackpackItem.type==null ? database_item4.getEnderBackpackItem(username, EnderBackpackItemName) : EnderBackpackItem.type);
         if (root == null) {
-            root = new Node<>(item);
-            add(item, quantity);
+            root = new Node<>(EnderBackpackItem);
+            add(EnderBackpackItemName, quantity);
         } else if (quantity >= 1){
-            Node<Item> parent = null;
-            Node<Item> current = root;
+            Node<EnderBackpackItem> parent = null;
+            Node<EnderBackpackItem> current = root;
             while (current != null) {                
-                if (item.compareTo(current.item) <0) {
+                if (EnderBackpackItem.compareTo(current.EnderBackpackItem) <0) {
                     parent = current;
                     current = current.left;
-                } else if (item.compareTo(current.item) >0) {
+                } else if (EnderBackpackItem.compareTo(current.EnderBackpackItem) >0) {
                     parent = current;
                     current = current.right;
                 } else {
                     current.addQuantity(quantity);
                     this.quantity += quantity;
-                    System.out.println("ADDED AMOUNT " + item.getName() + ", now have " + current.getQuantity());
-//                    System.out.println("Size of the tree: " + getSize());
+                    System.out.println("ADDED AMOUNT " + EnderBackpackItem.getName() + ", now have " + current.getQuantity());
+                    System.out.println("Size of the tree: " + getSize());
                     return;
                 }
             }
-            System.out.println("Parent: " + parent.item.getName());
-            // if the item is not found in the original tree, insert as a new node
-            if (item.compareTo(parent.item) < 0) {
-                parent.left = new Node<>(item);
+            System.out.println("Parent: " + parent.EnderBackpackItem.getName());
+            // if the EnderBackpackItem is not found in the original tree, insert as a new node
+            if (EnderBackpackItem.compareTo(parent.EnderBackpackItem) < 0) {
+                parent.left = new Node<>(EnderBackpackItem);
                 parent.left.parent  = parent;
-                parent.left.addQuantity(quantity); 
-                System.out.println("Inserted new item " + item + ", now have " + parent.left.getQuantity());
+                parent.left.addQuantity(quantity);  
+                this.quantity += quantity ;
+                System.out.println("Inserted new EnderBackpackItem " + EnderBackpackItem + ", now have " + parent.left.getQuantity());
             } else {
-                parent.right = new Node<>(item);
+                parent.right = new Node<>(EnderBackpackItem);
                 parent.right.parent  = parent;
-                parent.right.addQuantity(quantity); 
-                System.out.println("Inserted new item " + item + ", now have " + parent.right.getQuantity());
+                parent.right.addQuantity(quantity);
+                System.out.println("Inserted new EnderBackpackItem " + EnderBackpackItem + ", now have " + parent.right.getQuantity()); 
+                this.quantity += quantity;
             }
-            this.quantity += quantity;
+            
         }
         size++;
-//        System.out.println("Size of the tree: " + getSize());
-    }
-    
-    public String remove(String itemName) {
-        return remove(itemName, 1);
+        System.out.println("Size of the tree: " + getSize());
     }
     
     // ----------------------------got bug----------------------------
-    public String remove(String itemName, int quantity) {
+    public String remove(String EnderBackpackItemName, int quantity) throws SQLException {
         if (size ==0) return null;
-        Node<Item> current = getNode(itemName);
+        Node<EnderBackpackItem> current = getNode(EnderBackpackItemName);
         if (current != null) {
             // remove the node entirely
             if (current.getQuantity() <= quantity) {
                 if (current.right != null) {
-                    Node<Item>leftmostOfTheRight = current.right;
+                    Node<EnderBackpackItem>leftmostOfTheRight = current.right;
                     while (leftmostOfTheRight.left != null) {                        
                         leftmostOfTheRight = leftmostOfTheRight.left;
                     }
@@ -106,25 +108,25 @@ public class BinarySearchTree<E extends Item> {
                             current.left.parent = leftmostOfTheRight;
                         }
                         if (current != root){
-                            if (current.item.getName().compareTo(current.parent.item.getName()) < 0) {
+                            if (current.EnderBackpackItem.getName().compareTo(current.parent.EnderBackpackItem.getName()) < 0) {
                                 leftmostOfTheRight.parent = current.parent;
                                 current.parent.left = leftmostOfTheRight;
                                 
-//                                System.out.println("Current: " + current.item.getName());
-//                                System.out.println("current.parent.left: " + current.parent.left.item.getName());
+//                                System.out.println("Current: " + current.EnderBackpackItem.getName());
+//                                System.out.println("current.parent.left: " + current.parent.left.EnderBackpackItem.getName());
                             } else {
                                 leftmostOfTheRight.parent = current.parent;
                                 current.parent.right = leftmostOfTheRight;
-//                                System.out.println("Current: " + current.item.getName());
-//                                System.out.println("current.parent.left: " + current.parent.left.item.getName());
+//                                System.out.println("Current: " + current.EnderBackpackItem.getName());
+//                                System.out.println("current.parent.left: " + current.parent.left.EnderBackpackItem.getName());
                             }
                                 
                         } else {
                             root = leftmostOfTheRight;
                             root.parent = null;
-//                            System.out.println("New root: " + root.item.getName());
-//                            System.out.println("root.left: " + root.left.item.getName());
-//                            System.out.println("root.right: " + root.right.item.getName());
+//                            System.out.println("New root: " + root.EnderBackpackItem.getName());
+//                            System.out.println("root.left: " + root.left.EnderBackpackItem.getName());
+//                            System.out.println("root.right: " + root.right.EnderBackpackItem.getName());
                         }
                     }
                 } else if (current == root) {
@@ -132,7 +134,7 @@ public class BinarySearchTree<E extends Item> {
                     if (root!= null) {
                         root.parent = null;
                     }
-                } else if (current.item.getName().compareTo(current.parent.item.getName()) > 0){
+                } else if (current.EnderBackpackItem.getName().compareTo(current.parent.EnderBackpackItem.getName()) > 0){
                     current.parent.right = current.left;
                     if (current.left != null) {
                         current.parent.right.parent = current.parent;
@@ -151,35 +153,38 @@ public class BinarySearchTree<E extends Item> {
                 size--;
                 current.parent = null;
                 // ------------------------------------Add back quantity---------------------------------------------
-                
-                System.out.printf("All %s is removed. Remain? %b%n", current.item.getName(), contains(itemName));
+                System.out.printf("All %s is removed. Remain? %b%n", current.EnderBackpackItem.getName(), contains(EnderBackpackItemName));
             } else {
                 current.removeQuantity(quantity);
                 this.quantity -= quantity;
-                System.out.printf("%d of %s is removed. Remain %d%n", quantity, current.item.getName(), current.getQuantity());
+                System.out.printf("%d of %s is removed. Remain %d%n", quantity, EnderBackpackItemName, current.getQuantity());
             }
             current.increaseCountOfUse();
-            return current.item.getName();
+            return current.EnderBackpackItem.getName();
         }
         return null;
     }
     
-    public String removeAll(String itemName) {
-        Node<Item> current = getNode(itemName);
-        return (current != null) ? remove(itemName, current.getQuantity()) : null;
+    public String removeAll(String EnderBackpackItemName) throws SQLException {
+        Node<EnderBackpackItem> current = getNode(EnderBackpackItemName);
+        return (current != null) ? remove(EnderBackpackItemName, current.getQuantity()) : null;
     }
     
-    public boolean contains(String item) {
-        Node<Item> current = getNode(item);
+    public boolean contains(String EnderBackpackItem) {
+        Node<EnderBackpackItem> current = getNode(EnderBackpackItem);
         return current != null;
     }
     
-    public List<Item> retrivePossibleItemsAfterwards(String searchedItem) {
-        Node<Item> current  = root;
+    public List<EnderBackpackItem> retrivePossibleEnderBackpackItemsAfterwards(String searchedEnderBackpackItem) {
+        Node<EnderBackpackItem> current  = root;
         retriveAllItems();
+        boolean needAdd1 = false;
         while (current != null) {
-            int compare = searchedItem.compareToIgnoreCase(current.item.getName());
-//            System.out.println("Compare: " + compare);
+            int compare = searchedEnderBackpackItem.compareToIgnoreCase(current.EnderBackpackItem.getName());
+            System.out.println("serched : " + searchedEnderBackpackItem);
+            System.out.println("current: " + current.EnderBackpackItem.getName());
+            System.out.println("current.left: " + current.left);
+            System.out.println("current.right: " + current.right);
             if (compare == 0) {
                 break;
             } else if (compare < 0 ) {
@@ -189,50 +194,51 @@ public class BinarySearchTree<E extends Item> {
                     break;
                 } 
             } else {
-                if (current.left == null && current.right == null) {
-                    current = current.parent;
-                    break;
-                }
-                if (current.right != null && current.right.item.getName().compareToIgnoreCase(searchedItem)<0) {
-                    current = current.parent;
-                    break;
+                if (current.right == null){
+                    if (current.parent!=null && current.parent.EnderBackpackItem.getName().compareToIgnoreCase(current.EnderBackpackItem.name) > 0) {
+                        current = current.parent;
+                        break;
+                    } else {
+                        needAdd1 = true;
+                        break;
+                    }
                 } else {
                     current = current.right;
                 }
             }
         }
-        // if the item not found
+        // if the EnderBackpackItem not found
         if (current == null) {
             return null;
         }
         int index = 0;
         for (int i = 0; i < retrivingList.size(); i++) {
-            if (retrivingList.get(i) == (current.item)) {
+            if (retrivingList.get(i) == (current.EnderBackpackItem)) {
                 index = i;
 //                System.out.println(retrivingList.get(i));
-//                System.out.println((current.item));
+//                System.out.println((current.EnderBackpackItem));
 //                System.out.println("index " + index);
                 break;
             }
         }
-        return retrivingList.subList(index, size);
+        return retrivingList.subList((needAdd1 && index + 1 < size)? index +1 : index, size);
     }
     
-    public ArrayList<Item> retriveAllItems() {
+    public ArrayList<EnderBackpackItem> retriveAllItems() {
         retrivingList = new ArrayList<>();
         return retriveAllItemssupplement(root);
     }
     
-    public Node<Item> getNode(String name) {
+    public Node<EnderBackpackItem> getNode(String name) {
         if (size ==0) return null;
-        Node<Item> current = root;
+        Node<EnderBackpackItem> current = root;
         while (current != null) {            
-            if (name.compareToIgnoreCase(current.item.getName()) < 0)
+            if (name.compareToIgnoreCase(current.EnderBackpackItem.getName()) < 0)
                 current = current.left;
-            else if (name.compareToIgnoreCase(current.item.getName()) > 0)
+            else if (name.compareToIgnoreCase(current.EnderBackpackItem.getName()) > 0)
                 current = current.right;
             else{
-//                System.out.println("Current: " +current.item.getName());
+//                System.out.println("Current: " +current.EnderBackpackItem.getName());
                 return current;
             }
                 
@@ -240,23 +246,23 @@ public class BinarySearchTree<E extends Item> {
         return null;
     }
     
-    public int getQuantity(String item) {
-        Node<Item> current = getNode(item);
+    public int getQuantity(String EnderBackpackItem) {
+        Node<EnderBackpackItem> current = getNode(EnderBackpackItem);
         if (current!= null) {
             return current.getQuantity();
         }
         return 0;
     }
     
-    private ArrayList<Item> retriveAllItemssupplement(Node<Item> subroot) {
+    private ArrayList<EnderBackpackItem> retriveAllItemssupplement(Node<EnderBackpackItem> subroot) {
         if (subroot == null) {
             return null;
         }
         if (subroot.left == null) {
-            retrivingList.add(subroot.item); 
+            retrivingList.add(subroot.EnderBackpackItem); 
         } else {
             retriveAllItemssupplement(subroot.left);
-            retrivingList.add(subroot.item); 
+            retrivingList.add(subroot.EnderBackpackItem); 
         } if (subroot.right!= null) {
             retriveAllItemssupplement(subroot.right);
         } 
@@ -269,9 +275,9 @@ public class BinarySearchTree<E extends Item> {
         root = null;
     }
     
-    private ArrayList<Node<Item>> path(Node<Item> node){
-        ArrayList<Node<Item>> path = new ArrayList<>();
-        Node<Item> current = getNode(node.item.getName());
+    private ArrayList<Node<EnderBackpackItem>> path(Node<EnderBackpackItem> node){
+        ArrayList<Node<EnderBackpackItem>> path = new ArrayList<>();
+        Node<EnderBackpackItem> current = getNode(node.EnderBackpackItem.getName());
         while (current != null) {            
             path.add(current);
             current = current.parent;
@@ -279,16 +285,16 @@ public class BinarySearchTree<E extends Item> {
         return path;
     }
     
-    private class Node<E extends Item> {
-        Item item;
-        Node<Item> left;
-        Node<Item> right;
-        Node<Item> parent;
+    private class Node<E extends EnderBackpackItem> {
+        EnderBackpackItem EnderBackpackItem;
+        Node<EnderBackpackItem> left;
+        Node<EnderBackpackItem> right;
+        Node<EnderBackpackItem> parent;
         int quantity = 0;
         int countOfUse = 0;
         
-        public Node(Item item) {
-            this.item = item;
+        public Node(EnderBackpackItem EnderBackpackItem) {
+            this.EnderBackpackItem = EnderBackpackItem;
         }
         
         public int addQuantity(int quantity) {
@@ -326,7 +332,7 @@ public class BinarySearchTree<E extends Item> {
 
         @Override
         public String toString() {
-            return item.getName();
+            return EnderBackpackItem.getName();
         }
     }
 }

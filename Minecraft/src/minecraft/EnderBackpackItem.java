@@ -1,6 +1,6 @@
 package minecraft;
 
-public class EnderBackpackItem {
+public class EnderBackpackItem implements Comparable<EnderBackpackItem>{
     public int quantity;
     public String name, type, function;
 
@@ -84,5 +84,10 @@ public class EnderBackpackItem {
     @Override
     public String toString() {
         return name + " " + type + "Grade:" + "2";
+    }
+
+    @Override
+    public int compareTo(EnderBackpackItem o) {
+        return name.compareTo(o.name);
     }
 }

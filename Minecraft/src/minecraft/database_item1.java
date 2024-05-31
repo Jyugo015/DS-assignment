@@ -19,7 +19,7 @@ public class database_item1 {
         String driver = "com.mysql.cj.jdbc.Driver";
         String url = "jdbc:mysql://localhost:3306/minecraft";
         String username = "root";
-        String password = "dbqLb1234!";
+        String password = "harimau";
         try {
             Class.forName(driver);
         } catch (ClassNotFoundException e) {
@@ -28,7 +28,7 @@ public class database_item1 {
         Connection connection = DriverManager.getConnection(url, username, password);
         return connection;
     }
-
+    
     public static ArrayList<String> retrieveItem(String user) throws SQLException{
         ArrayList<String> record = new ArrayList<String>();
         Connection connection = getConnection();
