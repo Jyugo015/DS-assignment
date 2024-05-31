@@ -118,6 +118,9 @@ public class LoginController implements Initializable {
             }
             e.printStackTrace();
         }
+        
+        Stage currentStage = (Stage) emailField.getScene().getWindow();
+        currentStage.close();
     }
 
     @FXML
