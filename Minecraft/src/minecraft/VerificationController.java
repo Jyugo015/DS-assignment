@@ -8,8 +8,16 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
@@ -25,8 +33,8 @@ public class VerificationController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         // TODO
-    }    
-    
+    }
+
     @FXML
     private TextField verificationCodeField;
     @FXML
@@ -60,9 +68,27 @@ public class VerificationController implements Initializable {
             signupController.completeSignup(email, username, password);
             Stage stage = (Stage) verificationCodeField.getScene().getWindow();
             stage.close();
+
+            showSignupSuccessfulDialog();
         } else {
             errorLabel.setText("Invalid verification code.");
         }
     }
-    
+
+    private void showSignupSuccessfulDialog() {
+        // Create an alert of type INFORMATION
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle("Signup Successful");
+        alert.setHeaderText(null); // No header text
+        
+        // Create the content text with a larger font size
+        Label contentText = new Label("Your signup was successful!");
+        contentText.setStyle("-fx-font-size: 16px;"); // Set the font size to 16px
+
+        // Set the content of the alert to the custom label
+        alert.getDialogPane().setContent(contentText);
+        // Show the alert and wait for the user to close it
+        alert.showAndWait();
+    }
+
 }
